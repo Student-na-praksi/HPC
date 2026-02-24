@@ -82,8 +82,11 @@
 ## Pervasive parallelism
 
 - von Neumann architecture: CPU, memory, I/O
-- for a long time (until 2004), the performance of computer systems increased through miniaturization (relays, vacuum tubes, increasingly smaller and more numerous transistors, raising the clock frequency) and improvements in hardware.
-- Dennard scaling applied: reducing the size of a transistor by half increases their number fourfold, each transistor operates twice as fast (shorter connections), while the amount of dissipated heat remains unchanged
+- for a long time (until mid-2000s), the performance of computer systems increased through miniaturization (relays, vacuum tubes, increasingly smaller and more numerous transistors, raising the clock frequency) and improvements in hardware.
+- Dennard scaling applied
+  - when you shrink a transistor its dimension, voltage, and current shrink
+  - reducing the size of a transistor by half increases their number fourfold, each transistor operates twice as fast (shorter connections), while the amount of dissipated heat remains unchanged
+  - around mid‑2000s, shrinking transistors caused leakage currents and heat problems, voltage could no longer scale down, power density started rising
 - characteristics of processors over time ([graph](https://www.karlrupp.net/2018/02/42-years-of-microprocessor-trend-data/))
 - Moore’s law: system performance doubles every 18 months ([graph](https://en.wikipedia.org/wiki/Transistor_count#/media/File:Moore's_Law_Transistor_Count_1970-2020.png))
 - a problem arises with heat dissipation when processor power consumption exceeds 130 W
