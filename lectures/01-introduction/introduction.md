@@ -53,7 +53,7 @@
       - CERN: CMS, ATLAS
       - OpenFOAM, ANSYS
       - Gromacs, Quantum espresso
-      - AI: Keras, TensorFlow, Keras, PyTorch
+      - AI: Keras, TensorFlow, PyTorch
 
 - reasons for HPC
   - faster time to solution (response time)
@@ -114,7 +114,7 @@
 
   <img src="figures/energy-consumption-single-double.core.png" alt="energy consumption: single- and double-core systems" width="75%">
 
-## Three walls in 2025
+## Three walls hit in mid-2000s
 
 - key limitations that led to multi‑core processors:
 

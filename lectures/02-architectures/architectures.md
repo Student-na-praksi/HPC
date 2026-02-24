@@ -1,6 +1,6 @@
 # Computer Systems Architectures
 
-## von Neumannova architecture and improvements
+## von Neumann architecture and improvements
 
 - central processing unit or processor, memory, I/O devices
 
