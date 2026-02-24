@@ -37,17 +37,17 @@
   - multi-level cache system (L1, L2, L3)
 - virtual memory
   - extension of main memory
-  - significantly slower than main memory, even greater need for data locality
-  - page swapping and page faults
-  - rapid virtual to physical memory address mapping
-    - TLB (Translation Lookaside Buffer)
-      - specialized cache for address translation (up to 128 entries on 1st level)
-      - TLB miss
-        - access to a page not in TLB, walking over the whole page table to find translation
-        - Example: stencil @ large 3D array: row, column, page access
-        - Element by element walk, number of pages can be large
-        - High TLB miss rate when accessing neighboring elements even when number of page faults is low
-        - If the 3D array is big, a high page fault rate may also result  
+  - each process sees its own private address space
+  - memory is divided into pages for simpler OS management (tipical size 2MB)
+  - page swapping and page faults when the size of virtual memory is grater than the size of physical
+    - significantly slower access than to main memory (1,000,000 times), even greater need for data locality
+  - rapid virtual to physical memory address mapping with the help of translation lookaside buffer (TLB)
+    - specialized cache for virtual to physical address translation (up to 128 entries on 1st level)
+    - TLB hit
+      - no need to access page table
+    - TLB miss
+      - access to a page not in TLB, element by element walk over the whole page table to find translation
+      - high TLB miss rate when accessing memory elements even when number of page faults is low (but higher than the size of TLB)
 
 ### Hardware parallelism
 
