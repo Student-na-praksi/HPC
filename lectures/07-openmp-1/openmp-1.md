@@ -10,8 +10,10 @@
 
   ```C
   #include "omp.h"
-  ...
-  gcc … -f openmp
+  
+  gcc … -fopenmp ...
+
+  srun --cpus-per-task=N
   ```
 
 - Main OpenMP elements
@@ -78,8 +80,9 @@
 
   - parallelization of ```num``` nested loops is possible with ```parallel for collapse (num)```
   - example
-    - [mandelbrot-0.c](files/basic/mandelbrot-0.c)
-    - [mandelbrot-1.c](files/basic/mandelbrot-1.c)
+    - [mb-0.c](files/basic/mb-0.c): parallelization of outermost loop
+    - [mb-1.c](files/basic/mb-1.c): parallelization of both loops
+    - [mb-2.c](files/basic/mb-2.c): dynamic scheduling
 
 - ```parallel for schedule(type, number)```
   - useful when workload significantly differs from iteration to iteration
@@ -126,10 +129,11 @@
     - faster than critical
 
 - example:
-  - computing $\pi$ as
+  - computing $\pi$ following Lebnitz formula
     $$ \pi = \sum{i=0}^{i=N-1} (-1)^i\frac{4}{2*i+1} $$
-  - [pits0.c](files/basic/pits0.c)
-  - [pits1.c](files/basic/pits1.c)
+  - [pil0.c](files/basic/pil0.c): does not compile as for loop is not in canonical form
+  - [pil1.c](files/basic/pil1.c): loop dependence, race condition
+  - [pil2.c](files/basic/pil2.c): correct result, poor performance
   
 - hardware implementation
   - modern processors do not lock memory bus, but works on cache line

@@ -14,11 +14,14 @@
 
 - Week 02:
   - lectures:
-    [cluster](lectures/03-cluster/cluster.md), [serial patterns](lectures/04-patterns-serial/patterns-serial.md)
+    [cluster](lectures/03-cluster/cluster.md),
+    [serial patterns](lectures/04-patterns-serial/patterns-serial.md)
   - labs:
     [Arnes Cluster](labs/01-Arnes-Cluster/Arnes-Cluster.md)
 
 - Week 03:
   - lectures:
-    [pattern: map](lectures/05-patterns-map/patterns-map.md)
+    [pattern: map](lectures/05-patterns-map/patterns-map.md),
+    [shared-memory systens](lectures/06-shared-memory-systems/shared-memory-systems.md),
+    [OpenMP](lectures/07-openmp-1/openmp-1.md)
   - labs:

@@ -2,24 +2,32 @@
 #include "omp.h"
 
 int main() {
-    #pragma omp parallel {
-		#pragma omp sections nowait {
-			#pragma omp section {
+    #pragma omp parallel 
+	{
+		#pragma omp sections
+		// #pragma omp sections nowait 
+		{
+			#pragma omp section 
+			{
 				int ID = omp_get_thread_num();
 				printf("hello(%d) ", ID);
 			}
-			#pragma omp section {
+			#pragma omp section 
+			{
 				int ID = omp_get_thread_num();
 				printf("world(%d) ", ID);
 			}
 		}
 
-		#pragma omp sections {
-			#pragma omp section {
+		#pragma omp sections 
+		{
+			#pragma omp section 
+			{
 				int ID = omp_get_thread_num();
 				printf("HELLO(%d) ", ID);
 			}
-			#pragma omp section {
+			#pragma omp section 
+			{
 				int ID = omp_get_thread_num();
 				printf("WORLD(%d) ", ID);
 			}

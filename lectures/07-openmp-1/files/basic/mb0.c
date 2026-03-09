@@ -1,3 +1,7 @@
+// Mandelbrot set calculation using OpenMP
+// gcc -fopenmp -o mandelbrot0 mandelbrotx.c
+// srun --cpus-per-task=16 mandelbrotx
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <omp.h>

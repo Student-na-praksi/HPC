@@ -29,6 +29,14 @@
       - used by multiple processors
       - used for inter-process communication
 
+- check the architecture of a node in a the Arnes cluster
+
+  ```bash
+  module load likwid
+  srun --reservation=fri --exclusive likwid-topology -g
+  ```
+
+
 ### Cache Coherence
 
 - different processors must see the same value at a given memory address
