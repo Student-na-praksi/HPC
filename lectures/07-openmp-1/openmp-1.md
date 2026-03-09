@@ -130,7 +130,7 @@
 - example:
   - computing $\pi$ following Lebnitz formula
     $$
-    \pi = \sum_{i=0}^{N-1} (-1)^i\frac{4}{2i+1}
+    \pi = \sum_{i=0}^{N-1} (-1)^i
     $$
 
   - [pil0.c](files/basic/pil0.c): does not compile as for loop is not in canonical form
