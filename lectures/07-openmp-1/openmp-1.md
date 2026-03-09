@@ -129,9 +129,10 @@
 
 - example:
   - computing $\pi$ following Lebnitz formula
+    $$
+    \pi = \sum_{i=0}^{N-1} (-1)^i\frac{4}{2i+1}
+    $$
 
-    $ \pi = \sum{i=0}^{i=N-1} (-1)^i\frac{4}{2*i+1} $
-    
   - [pil0.c](files/basic/pil0.c): does not compile as for loop is not in canonical form
   - [pil1.c](files/basic/pil1.c): loop dependence, race condition
   - [pil2.c](files/basic/pil2.c): correct result, poor performance
