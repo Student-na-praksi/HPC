@@ -8,7 +8,7 @@
 
 - serial and parallel execution of the map pattern (elements of index set (black) and elemental functions (blue))
 
-  <img src="figures/map.png" alt="the map pattern", width="70%">
+  <img src="figures/map.png" alt="the map pattern", width="50%">
 
 - examples:
   - gamma correction in images, color space conversions
