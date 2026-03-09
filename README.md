@@ -14,12 +14,11 @@
 
 - Week 02:
   - lectures:
-    [cluster](lectures/03-cluster/cluster.md), [serial patterns](lectures/04-patterns/pattern-serial.md)
+    [cluster](lectures/03-cluster/cluster.md), [serial patterns](lectures/04-patterns-serial/patterns-serial.md)
   - labs:
     [Arnes Cluster](labs/01-Arnes-Cluster/Arnes-Cluster.md)
 
 - Week 03:
   - lectures:
-    [pattern: map](lectures/04-patterns/pattern-map.md)
+    [pattern: map](lectures/05-patterns-map/pattern-map.md)
   - labs:
-    
