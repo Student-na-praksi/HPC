@@ -1,0 +1,37 @@
+name: Sync fork from laspp/HPC
+
+on:
+  schedule:
+    - cron: "0 4 * * *"   # daily at 04:00 UTC
+  workflow_dispatch: {}     # allows manual run
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout fork
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sync fork from laspp/HPC
+        env:
+          UPSTREAM_REPO: laspp/HPC
+          UPSTREAM_BRANCH: main
+          FORK_BRANCH: main
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git remote add upstream "https://github.com/${UPSTREAM_REPO}.git"
+          git fetch upstream "${UPSTREAM_BRANCH}"
+
+          git checkout "${FORK_BRANCH}"
+          # Safe mode: only fast-forward updates, fail on divergence
+          git merge --ff-only "upstream/${UPSTREAM_BRANCH}"
+
+          git push origin "${FORK_BRANCH}"
