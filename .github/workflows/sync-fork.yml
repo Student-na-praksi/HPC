@@ -8,6 +8,9 @@ on:
 permissions:
   contents: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -23,7 +26,7 @@ jobs:
           UPSTREAM_BRANCH: main
           FORK_BRANCH: main
         run: |
-          set -e
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
@@ -31,7 +34,14 @@ jobs:
           git fetch upstream "${UPSTREAM_BRANCH}"
 
           git checkout "${FORK_BRANCH}"
-          # Safe mode: only fast-forward updates, fail on divergence
-          git merge --ff-only "upstream/${UPSTREAM_BRANCH}"
+          # Try strict fast-forward first. If fork has extra commits (e.g. workflow files),
+          # rebase them on top of upstream so fork is no longer behind.
+          if git merge --ff-only "upstream/${UPSTREAM_BRANCH}"; then
+            echo "Fast-forward sync completed"
+          else
+            echo "Fast-forward not possible; rebasing fork commits onto upstream"
+            git rebase "upstream/${UPSTREAM_BRANCH}"
+          fi
 
-          git push origin "${FORK_BRANCH}"
+          # Rebase rewrites commit IDs, so use --force-with-lease for safe update.
+          git push --force-with-lease origin "${FORK_BRANCH}"
