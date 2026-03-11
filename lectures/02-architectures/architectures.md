@@ -1,6 +1,6 @@
 # Computer Systems Architectures
 
-## von Neumann architecture and improvements
+## von Neumann Architecture and Improvements
 
 - central processing unit or processor, memory, I/O devices
 
@@ -13,7 +13,7 @@
   - memory hierarchy
   - hardware parallelism
 
-### Memory hierarchy
+### Memory Hierarchy
 
 <img src="figures/memory-hierarchy.png" alt="memory hierarchy" width="40%">
 
@@ -49,7 +49,7 @@
       - access to a page not in TLB, element by element walk over the whole page table to find translation
       - high TLB miss rate when accessing memory elements even when number of page faults is low (but higher than the size of TLB)
 
-### Hardware parallelism
+### Hardware Parallelism
 
 - pipelining
   - functional units are arranged into stages
@@ -94,7 +94,7 @@
     - when one thread stops due to memory or IO access, another can be processed
     - rapid switching of threads at the long-latency operations
 
-### Serial illusion
+### Serial Illusion
 
 - developments in hardware have led to long-sustained serial illusion
 - serial traps: serial assumptions incorporated in tools and thinking
@@ -111,7 +111,7 @@
 
 - compilers are not reliable at discovering parallelism (loops, memory access via pointers in C)
 
-## Flynn's characterization
+## Flynn's Characterization
 
 - division with respect to instruction and data flow:
   - SISD: standard non-parallel (scalar) processor
@@ -152,7 +152,7 @@
 
 - poor scalability  
 
-## Shared‑memory systems
+## Shared‑memory Systems
 
 - multiple instructions, multiple data
 
@@ -171,7 +171,7 @@
   - memory access times
   - ensuring memory coherence
 
-## Distributed-memory systems  
+## Distributed-memory Systems
 
 - multiple instructions, multiple data
 
@@ -212,7 +212,7 @@
 - today extremely popular model, especially in AI
 - hierarchical design
 
-## Architecture of a modern computer system
+## Architecture of a Modern Computer System
 
 - heterogenous systems
   - shared-memory within a node

@@ -107,7 +107,7 @@
     - complex scheduling algorithms
     - resource time-limit
 
-#### SLURM architecture
+#### SLURM Architecture
 
 - image from [the SLURM website](https://slurm.schedmd.com/overview.html)
 
@@ -142,7 +142,7 @@
 - jobs: allocations of resources assigned to a user for a specified amount of time
 - job steps: sets of (possibly parallel) tasks within a job
 
-#### SLURM jobs
+#### SLURM Jobs
 
 - jobs are allocated nodes within a partition (according to the priorities) until the resources (nodes, processors, memory, etc.) within that partition are exhausted
 - once a job is assigned a set of nodes, the user is able to initiate parallel work in the form of job steps
@@ -158,7 +158,7 @@
     - failed (F), timeout (TO), suspended (S), revoked (RV), cancelled (CA),
     - node failure (NF), special exit (SE), configuring (CF)
 
-#### Important commands
+#### Important SLURM Commands
 
 - sinfo: information on node state
   - down, draining, drained, failing, fail, reboot, maintenance, power, ...
@@ -183,7 +183,7 @@
 - sstat: statistics of active job
 - sacct: statistics of active and finished jobs
 
-#### SLURM examples
+#### SLURM Examples
 
 - basic cluster info
 
