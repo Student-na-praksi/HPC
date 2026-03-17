@@ -36,12 +36,12 @@ jobs:
           git checkout "${FORK_BRANCH}"
           # Try strict fast-forward first. If fork has extra commits (e.g. workflow files),
           # rebase them on top of upstream so fork is no longer behind.
-          if git merge --ff-only --no-edit "upstream/${UPSTREAM_BRANCH}"; then
-            echo "Fast-forward sync completed"
-          else
+          # if git merge --ff-only --no-edit "upstream/${UPSTREAM_BRANCH}"; then
+          #   echo "Fast-forward sync completed"
+          # else
             echo "Fast-forward not possible; rebasing fork commits onto upstream"
             git rebase --no-edit "upstream/${UPSTREAM_BRANCH}"
-          fi
+          # fi
 
           # Rebase rewrites commit IDs, so use --force-with-lease for safe update.
           git push --force-with-lease origin "${FORK_BRANCH}"
