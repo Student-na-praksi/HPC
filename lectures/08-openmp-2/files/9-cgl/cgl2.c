@@ -35,12 +35,15 @@ int main(void) {
 					board_new[i][j] = 0;
 			}
 
+        #pragma omp barrier	// wait for all threads to finish before updating board_new
+
 		#pragma omp master
         {
 		    board_update(&board, &board_new);
             iters++;
         }
-        #pragma omp barrier
+		
+        #pragma omp barrier	// wait for master thread to update board before next iteration
 	}
 
 	dt = omp_get_wtime()-dt;

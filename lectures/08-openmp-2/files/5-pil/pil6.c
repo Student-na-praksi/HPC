@@ -25,14 +25,15 @@ int main(void) {
 			sum += 4.0 * factor / (2 * i + 1);
 		}
 		mysum[omp_get_thread_num()] = sum;
-	}
 
-	#pragma omp parallel master
-	{
+		#pragma omp barrier
+
+		#pragma omp master
 		for (int i = 0; i < omp_get_num_threads(); i++)
 			pi += mysum[i];
-		free(mysum);
 	}
+
+	free(mysum);
 
 	double endTime = omp_get_wtime();
 	printf("pi: %lf, time taken: %lf seconds\n", pi, endTime - startTime);
