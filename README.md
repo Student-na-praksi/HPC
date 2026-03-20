@@ -25,3 +25,7 @@
     [shared-memory systems](lectures/06-shared-memory-systems/shared-memory-systems.md),
     [OpenMP](lectures/07-openmp-1/openmp-1.md)
   - labs: [Assignment 1 - Parallel Seam Carving](labs\02-Assignment1-OpenMP\Assignment1.md)
+
+- Week 04:
+  - lectures:
+  - labs: Consultations regarding Assignment 1
