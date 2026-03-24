@@ -36,5 +36,5 @@
 
 - Week 05:
   - lectures:
-    [Vector units](lectures/10-simd/simd.md)
+    [Graphics Processing Units](lectures/11-gpus/gpus.md),
   - labs:
