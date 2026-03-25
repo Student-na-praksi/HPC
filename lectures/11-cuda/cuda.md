@@ -130,7 +130,7 @@
 
 - Single precision A times X Plus Y
 - vectors **x** and **y**
-- element-wise operation ```y[i] = a * x[i] + y[i]````
+- element-wise operation ```y[i] = a * x[i] + y[i]```
 - the map pattern
 - solutions
   - [saxpy-0.cu](files/saxpy-0.cu): support for one thread block
