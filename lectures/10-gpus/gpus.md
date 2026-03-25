@@ -55,7 +55,7 @@
   - latency hiding for memory access
   - excellent for highly parallel problems: data-parallel streams, matrix operations
 
-<img src="figures/silicon.png" alt="Silicon usage in CPU and GPU" width="60%"/>
+  <img src="figures/silicon.png" alt="Silicon usage in CPU and GPU" width="80%"/>
 
 ### Hierarchical processor design
 
@@ -81,6 +81,8 @@
   - load/store units handle operand transfer
 
 <img src="figures/nvidia-compute-units.png" alt="Nvidia compute unit development" width="100%" />
+
+*Source: documentation from [Nvidia](https://www.nvidia.com/) web pages*
 
 ### Hierarchical memory design
 
