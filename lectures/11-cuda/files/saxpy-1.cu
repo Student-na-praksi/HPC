@@ -1,4 +1,4 @@
-// compute a*x+y on vectors
+// compute y = a*x+y on vectors
 //      support for multiple blocks
 //  nvcc -o saxpy-1 saxpy-1.cu
 //  srun --reservation=fri --partition=gpu --gpus=1 ./saxpy-1

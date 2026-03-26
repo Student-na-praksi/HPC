@@ -1,7 +1,8 @@
-// compute a*x+y on vectors
-//      we use only one block, max 1024 elements
-//  nvcc -o saxpy-0 saxpy-0.cu
-//  srun --reservation=fri --partition=gpu --gpus=1 ./saxpy-0
+// compute y = a*x+y on vectors
+//      support for multiple blocks, check size to stay in the range of the allocated memory 
+//      works with limited number of blocks
+//  nvcc -o saxpy-3 saxpy-3.cu
+//  srun --reservation=fri --partition=gpu --gpus=1 ./saxpy-3
 
 
 #include <stdio.h>
@@ -10,12 +11,16 @@
 #include "helper_cuda.h"
 
 
-#define VECTOR_SIZE 1024
-// #define VECTOR_SIZE 2048
+#define VECTOR_SIZE 2048
+#define BLOCK_SIZE 256
 
-__global__ void saxpy(float a, float *x, float *y) {
-    int tid = threadIdx.x;
-    y[tid] = a * x[tid] + y[tid];
+
+__global__ void saxpy(float a, float *x, float *y, int size) {    
+    int tid = blockDim.x * blockIdx.x + threadIdx.x;
+    while (tid < size) {
+        y[tid] = a * x[tid] + y[tid];
+        tid += gridDim.x * blockDim.x;
+    }
 }
 
 
@@ -41,7 +46,10 @@ int main(void) {
     checkCudaErrors(cudaMemcpy(d_y, h_y, VECTOR_SIZE * sizeof(float), cudaMemcpyHostToDevice));
 
     // Compute on device
-    saxpy<<<1, VECTOR_SIZE>>>(a, d_x, d_y);
+    dim3 blockSize(BLOCK_SIZE);
+    //dim3 gridSize((VECTOR_SIZE - 1)/blockSize.x + 1);
+    dim3 gridSize(1);
+    saxpy<<<gridSize, blockSize>>>(a, d_x, d_y, VECTOR_SIZE);
     checkCudaErrors(cudaGetLastError());
 
     // Transfer data: device --> host

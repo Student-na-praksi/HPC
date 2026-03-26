@@ -32,6 +32,7 @@
   - OpenCL (Khronos Group)
     - very general, supports GPUs, FPGA circuits, and DSP chips
     - portability comes at a cost – each program includes a lot of initialization and system checking code
+  - many others
 - programming model:
   - quite different from CPU programming
   - code must largely be rewritten
@@ -54,7 +55,7 @@
   - latency hiding for memory access
   - excellent for highly parallel problems: data-parallel streams, matrix operations
 
-<img src="figures/silicon.png" alt="Silicon usage in CPU and GPU" width="60%"/>
+  <img src="figures/silicon.png" alt="Silicon usage in CPU and GPU" width="80%"/>
 
 ### Hierarchical processor design
 
@@ -80,6 +81,8 @@
   - load/store units handle operand transfer
 
 <img src="figures/nvidia-compute-units.png" alt="Nvidia compute unit development" width="100%" />
+
+*Source: documentation from [Nvidia](https://www.nvidia.com/) web pages*
 
 ### Hierarchical memory design
 
@@ -115,20 +118,20 @@
 
 ## Heterogeneous system
 
-- in addition to CPU cores, contains one or more accelerators
-- CPU = host, accelerator = device
+- a node, in addition to CPU cores, contains one or more accelerators
+- CPU and GPU are often named host and device, respectively
 - offloading model
 - device is usually connected via a high-speed bus
   - programs consist of two parts:
     - sequential code on the host:
       - device detection (1)
-      - compilation (2) and transfer of program kernels (3)
-      - data transfer to device (4)
+      - data transfer to device (2)
+      - compilation (3) and transfer of program kernels (4)
       - trigger kernel execution (5)
       - transfer of results back to host (7)
   - parallel code on the device:
-    - program kernel
-    - executed by every thread
+    - program kernel execution (6)
+    - executed by every thread 
 - asynchronous execution:
   - host continues execution after launching a kernel
   - kernel execution can overlap with data transfers
@@ -138,7 +141,7 @@
 ## Execution model
 
 - emphasis on data parallelism
-- the idea is to create a large number of threads to hide memory latency
+- the idea is to create a large number of threads to hide memory latency - utterly different from CPUs where caches and out-of-order execution are used for latency hiding
 - hierarchical thread organization:
   - follows hierarchical architecture of processors and memory - thread grid, block, warp
   - thread grid
@@ -194,34 +197,31 @@
   - example of an output
 
     ```C
-    ======= Device 0: "NVIDIA H100 PCIe" =======
+    ======= Device 0: "Tesla V100S-PCIE-32GB" =======
 
-    cudaDeviceGetProperties:
-        CUDA Architecture:                             Hopper, 9.0
+      CUDA Architecture:                                      Volta, 7.0
 
-        GPU clock rate (MHz):                          1755
-        Memory clock rate (MHz):                       1593
-        Memory bus width (bits):                       5120
-        Peak memory bandwidth (GB/s):                  2039
+      GPU clock rate (MHz):                                   1597
+      Memory clock rate (MHz):                                1107
+      Memory bus width (bits):                                4096
+      Peak memory bandwidth (GB/s):                           1134
 
-        Number of MPs:                                 114
-        Number of cores per MP:                        128
-        Total number of cores:                         14592
+      Number of compute units:                                80
+      Number of processing elements per compute unit:         64
+      Total number of processing elemets:                     5120
 
-        Total amount of global memory (GB):            79
-        Total amount of shared memory per MP (kB):     228
-        Total amount of shared memory per block (kB):  48
-        Maximum number of registers per MP:            65536
-        Total number of registers available per block: 65536
+      Total amount of global memory (GB):                     32
+      Size of L2 cache (MB):                                  6
+      Total amount of local memory per compute unit (kB):     96
+      Total amount of local memory per thread block (kB):     48
+      Maximum number of registers per compute unit:           65536
+      Maximum number of registers available per thread block: 65536
 
-        Maximum number of threads per MP:              2048
-        Maximum number of threads per block:           1024
-        Warp size:                                     32
+      Maximum number of threads per compute unit:             2048
+      Maximum number of threads per thread block:             1024
+      Maximum number of blocks per compute unit:              32
+      Thread warp size:                                       32
 
-        Max dimension size of a thread block (x,y,z):  (1024, 1024, 64)
-        Max dimension size of a grid size    (x,y,z):  (2147483647, 65535, 65535)
-
-    cudaDeviceGetAttribute:
-        Size of L2 cache in MB:                        50
-        Maximum number of blocks per MP:               32
+      Maximum size of a thread block (x,y,z):                 (1024, 1024, 64)
+      Maximum size of a thread grid (x,y,z):                  (2147483647, 65535, 65535)
     ```
