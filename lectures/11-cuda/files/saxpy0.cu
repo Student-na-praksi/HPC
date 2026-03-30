@@ -1,7 +1,7 @@
 // compute y = a*x+y on vectors
 //      we use only one block, max 1024 elements
-//  nvcc -o saxpy-0 saxpy-0.cu
-//  srun --reservation=fri --partition=gpu --gpus=1 ./saxpy-0
+//  nvcc -o saxpy0 saxpy0.cu
+//  srun --reservation=fri --partition=gpu --gpus=1 ./saxpy0
 
 
 #include <stdio.h>

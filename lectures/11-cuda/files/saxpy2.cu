@@ -1,7 +1,8 @@
 // compute y = a*x+y on vectors
-//      support for multiple blocks
-//  nvcc -o saxpy-1 saxpy-1.cu
-//  srun --reservation=fri --partition=gpu --gpus=1 ./saxpy-1
+//      support for multiple blocks, check size to stay in the range of the allocated memory 
+//      not good when the number of blocks is limited 
+//  nvcc -o saxpy2 saxpy2.cu
+//  srun --reservation=fri --partition=gpu --gpus=1 ./saxpy2
 
 
 #include <stdio.h>
@@ -10,12 +11,14 @@
 #include "helper_cuda.h"
 
 
-#define VECTOR_SIZE 2048
+#define VECTOR_SIZE 2049
 #define BLOCK_SIZE 256
 
-__global__ void saxpy(float a, float *x, float *y) {
+
+__global__ void saxpy(float a, float *x, float *y, int size) {   
     int tid = blockDim.x * blockIdx.x + threadIdx.x;
-    y[tid] = a * x[tid] + y[tid];
+    if (tid < size)
+        y[tid] = a * x[tid] + y[tid];
 }
 
 
@@ -42,8 +45,9 @@ int main(void) {
 
     // Compute on device
     dim3 blockSize(BLOCK_SIZE);
-    dim3 gridSize((VECTOR_SIZE - 1)/blockSize.x + 1);
-    saxpy<<<gridSize, blockSize>>>(a, d_x, d_y);
+    //dim3 gridSize((VECTOR_SIZE - 1)/blockSize.x + 1);
+    dim3 gridSize(1);
+    saxpy<<<gridSize, blockSize>>>(a, d_x, d_y, VECTOR_SIZE);
     checkCudaErrors(cudaGetLastError());
 
     // Transfer data: device --> host

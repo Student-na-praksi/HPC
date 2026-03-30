@@ -133,7 +133,8 @@
 - element-wise operation ```y[i] = a * x[i] + y[i]```
 - the map pattern
 - solutions
-  - [saxpy-0.cu](files/saxpy-0.cu): support for one thread block
-  - [saxpy-1.cu](files/saxpy-1.cu): added support for multiple thread blocks, the number of blocks is calculated based on the problem size
-  - [saxpy-2.cu](files/saxpy-2.cu): improved code, threads with global index out of the vector (array) bounds don't do any work
-  - [saxpy-3.cu](files/saxpy-3.cu): in case when total number of threads is smaller than the problem size, some threads do additional work
+  - [saxpy0.cu](files/saxpy0.cu): support for one thread block
+  - [saxpy1.cu](files/saxpy1.cu): added support for multiple thread blocks, the number of blocks is calculated based on the problem size
+  - [saxpy2.cu](files/saxpy2.cu): improved code, threads with global index out of the vector (array) bounds don't do any work
+  - [saxpy3.cu](files/saxpy3.cu): in case when total number of threads is smaller than the problem size, some threads do additional work
+  - [saxpy4.cu](files/saxpy4.cu): unified memory
