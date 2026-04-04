@@ -29,14 +29,18 @@ void heatStep(float* surfaceOut, float* surfaceIn, int width, int height) {
 int main(int argc, char *argv[]) {
 	
 	int N = atoi(argv[1]);
+    if (N % BLOCK_SIZE != 0) {
+        printf("Surface size must be a multiple of %d\n", BLOCK_SIZE);
+        return -1;
+    }
 
 	// init surface
-	float* h_surface = (float*)malloc(N * N * sizeof(float));
-	for(int i = 0; i < N * N; i++)
+	float* h_surface = (float*)malloc((N+2) * (N+2) * sizeof(float));
+	for(int i = 0; i < (N+2) * (N+2); i++)
 		h_surface[i] = 0.0;
-	for(int i = 0; i < N; i++) {
-		h_surface[i * N] = 100.0;
-		h_surface[i * N + N - 1] = 100.0;
+	for(int i = 1; i < N+1; i++) {
+		h_surface[i * (N+2)] = 100.0;
+		h_surface[i * (N+2) + (N+1)] = 100.0;
 		h_surface[i] = 100.0;
 	}
 
@@ -47,24 +51,27 @@ int main(int argc, char *argv[]) {
 
     checkCudaErrors(cudaEventRecord(start));
 
-    float* h_surfaceNew = (float*)malloc(N * N * sizeof(float));
-	for(int i = 0; i < N; i++) {
-		h_surfaceNew[i * N] = h_surface[i * N];
-		h_surfaceNew[i * N + N - 1] = h_surface[i * N + N - 1];
+    float* h_surfaceNew = (float*)malloc((N+2) * (N+2) * sizeof(float));
+	for(int i = 1; i < N+1; i++) {
+		h_surfaceNew[i * (N+2)] = h_surface[i * (N+2)];
+		h_surfaceNew[i * (N+2) + (N+1)] = h_surface[i * (N+2) + (N+1)];
 		h_surfaceNew[i] = h_surface[i];
 	}
 
     for(int i = 0; i < MAXITERS; i++) {
-        heatStep(h_surfaceNew, h_surface, N, N);
+        heatStep(h_surfaceNew, h_surface, N+2, N+2);
         float *temp = h_surface;
         h_surface = h_surfaceNew;
         h_surfaceNew = temp;
     }
 
-    unsigned char* img = (unsigned char*)malloc(N * N * sizeof(unsigned char));
-    for(int i = 0; i < N * N; i++)
-        img[i] = 255 - (unsigned char)(h_surface[i] * 255.0 / 100.0);
-   	stbi_write_png("heat0.png", N, N, 1, img, N);
+    unsigned char* img = (unsigned char*)malloc((N+2) * (N+2) * sizeof(unsigned char));
+    for(int i = 0; i < N+2; i++) {
+        for(int j = 0; j < N+2; j++) {
+            img[i * (N+2) + j] = 255 - (unsigned char)(h_surface[i * (N+2) + j] * 255.0 / 100.0);
+        }
+    }
+    stbi_write_png("heat.png", N+2, N+2, 1, img, N+2);
     free(img);
 
     free(h_surfaceNew);
