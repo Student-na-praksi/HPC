@@ -61,11 +61,11 @@
 - How is the heat distributed inside the surface?
 - Laplace equation
 
-  $$ \partial^2 T(x,y)\over \partial x^2 + \partial^2 T(x,y)\over \partial y^2 = 0 $$
+  $$ {\partial^2 T(x,y)\over \partial x^2} + {\partial^2 T(x,y)\over \partial y^2} = 0 $$
   
 - discretized Laplace equation is in proper form for iterative solving
 
-  $$ T(x, y) = \frac{1}{4}\left( T(x-h, y) + T(x+h, y) + T(x, y-h) + T(x, y+h) \right) $$
+  $$ T(x, y) = {1 \over 4} (T(x-h, y) + T(x+h, y) + T(x, y-h) + T(x, y+h)) $$
 
 - surface size $N+2$ includes boundary values on the edges
 - result
