@@ -62,7 +62,8 @@
 - How is the heat distributed inside the surface?
 - Laplace equation
 
-  $$ \part^2 T(x,y)\over \part x^2 $$
+  $$ \partial^2 T(x,y)\over \partial x^2 $$
+  $$ \frac{\partial f}{\partial x} $$
 
 ## Reduce
 
