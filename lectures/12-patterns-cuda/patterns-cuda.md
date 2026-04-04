@@ -65,7 +65,7 @@
   
 - discretized Laplace equation is in proper form for iterative solving
 
-  $ T(x, y) = \frac{1}{4} (T(x-h, y) + T(x+h, y) + T(x, y-h) + T(x, y+h)) $
+  $T(x, y) = 0.25 (T(x-h, y) + T(x+h, y) + T(x, y-h) + T(x, y+h))$
 
 - surface size $N+2$ includes boundary values on the edges
 - result
