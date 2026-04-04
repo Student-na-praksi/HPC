@@ -10,15 +10,14 @@
 
 __managed__ float sum;
 
-__global__ void dotprod(float *a, float *b, int n)
-{
+__global__ void dotprod(float *a, float *b, int n) {
+
     extern __shared__ float part[];
 
     part[threadIdx.x] = 0.0;
 
     int tid = blockDim.x * blockIdx.x + threadIdx.x;
-    while (tid < n)
-    {
+    while (tid < n) {
         part[threadIdx.x] += a[tid] * b[tid];
         tid += blockDim.x * gridDim.x;
     }
@@ -29,22 +28,19 @@ __global__ void dotprod(float *a, float *b, int n)
 	while (floorPow2 & (floorPow2-1))
 		floorPow2 &= floorPow2-1;
 
-	if (blockDim.x != floorPow2)
-	{
+	if (blockDim.x != floorPow2) {
 		if (threadIdx.x >= floorPow2)
 			part[threadIdx.x - floorPow2] += part[threadIdx.x];
         __syncthreads();
 	}
 
     int idxStep;
-	for(idxStep = floorPow2 >> 1; idxStep > 32 ; idxStep >>= 1 )
-	{
+	for(idxStep = floorPow2 >> 1; idxStep > 32 ; idxStep >>= 1 ) {
 		if (threadIdx.x < idxStep)
 			part[threadIdx.x] += part[threadIdx.x+idxStep];
         __syncthreads();
 	}
-	for( ; idxStep > 0 ; idxStep >>= 1 )
-	{
+	for( ; idxStep > 0 ; idxStep >>= 1 ) {
 		if (threadIdx.x < idxStep)
 			part[threadIdx.x] += part[threadIdx.x+idxStep];
 	}
@@ -54,8 +50,7 @@ __global__ void dotprod(float *a, float *b, int n)
 
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     float *a, *b;
 
     // arguments
@@ -72,8 +67,7 @@ int main(int argc, char *argv[])
 
 	// vectors initialization
     srand(time(NULL));
-	for (int i = 0; i < size; i++)
-	{
+	for (int i = 0; i < size; i++) {
 		a[i] = (double)rand()/RAND_MAX;
 		b[i] = (double)rand()/RAND_MAX;;
 	}

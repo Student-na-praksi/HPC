@@ -8,18 +8,16 @@
 #include "helper_cuda.h"
 
 
-__global__ void dotprod(float *a, float *b, float *c, int n)
-{
+__global__ void dotprod(float *a, float *b, float *c, int n) {
     int tid = blockDim.x * blockIdx.x + threadIdx.x;
-    while (tid < n)
-    {
+    while (tid < n) {
         c[tid] = a[tid] * b[tid];
         tid += blockDim.x * gridDim.x;
     }
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
+
     float *h_a, *h_b, *h_c;
     float *d_a, *d_b, *d_c;
     
@@ -38,8 +36,7 @@ int main(int argc, char *argv[])
 
 	// vectors initialization
     srand(time(NULL));
-	for (int i = 0; i < size; i++)
-	{
+	for (int i = 0; i < size; i++) {
 		h_a[i] = (double)rand()/RAND_MAX;
 		h_b[i] = (double)rand()/RAND_MAX;;
 	}

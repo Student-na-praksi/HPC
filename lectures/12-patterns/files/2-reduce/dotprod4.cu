@@ -10,15 +10,14 @@
 
 #define THREADS_PER_BLOCK_MAX 1024
 
-__global__ void dotprod(float *a, float *b, float *p, int n)
-{
+__global__ void dotprod(float *a, float *b, float *p, int n) {
+
     __shared__ float part[THREADS_PER_BLOCK_MAX];
 
     part[threadIdx.x] = 0.0;
 
     int tid = blockDim.x * blockIdx.x + threadIdx.x;
-    while (tid < n)
-    {
+    while (tid < n) {
         part[threadIdx.x] += a[tid] * b[tid];
         tid += blockDim.x * gridDim.x;
     }
@@ -26,8 +25,7 @@ __global__ void dotprod(float *a, float *b, float *p, int n)
     __syncthreads();
 
     int idxStep;
-	for(idxStep = blockDim.x/2; idxStep > 0 ; idxStep /= 2 )
-	{
+	for(idxStep = blockDim.x/2; idxStep > 0 ; idxStep /= 2 ) {
 		if (threadIdx.x < idxStep)
 			part[threadIdx.x] += part[threadIdx.x+idxStep];
         __syncthreads();
@@ -38,8 +36,8 @@ __global__ void dotprod(float *a, float *b, float *p, int n)
 
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
+
     float *h_a, *h_b, *h_p;
     float *d_a, *d_b, *d_p;
 
@@ -58,8 +56,7 @@ int main(int argc, char *argv[])
 
 	// vectors initialization
     srand(time(NULL));
-	for (int i = 0; i < size; i++)
-	{
+	for (int i = 0; i < size; i++) {
 		h_a[i] = (double)rand()/RAND_MAX;
 		h_b[i] = (double)rand()/RAND_MAX;;
 	}

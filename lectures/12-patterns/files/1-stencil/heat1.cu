@@ -3,29 +3,32 @@
 //      u(x,y) = 100 on three borders, 0 inside the domain at the beginning
 // compile and run:
 //      nvcc -o heat1 heat1.cu
-//      srun --reservation=fri --partition=gpu --gpus=1 ./heat1 8192
+//      srun --reservation=fri --partition=gpu --gpus=1 ./heat1 512
 
 #include <stdio.h>
 #include "cuda.h"
 #include "helper_cuda.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
 
-#define MAXITERS	1000
-#define BLOCK_SIZE	32
+#define MAXITERS	1000000
+#define BLOCK_SIZE	16
 
 __global__ void heatStep(float* surfaceOut, float* surfaceIn, int width, int height) {
 
     int gx = blockIdx.x * blockDim.x + threadIdx.x;
     int gy = blockIdx.y * blockDim.y + threadIdx.y;
-
-    if (gx <= 0 || gx >= width - 1 || gy <= 0 || gy >= height - 1) 
-		return;
-
+    
     int idx = gy * width + gx;
 
-    surfaceOut[idx] = 0.25 * (
-        surfaceIn[idx - 1] + surfaceIn[idx + 1] +
-        surfaceIn[idx - width] + surfaceIn[idx + width]
-    );
+    int interior = gx > 0 && gx < width - 1 && gy > 0 && gy < height - 1;
+
+    if (interior) {
+        surfaceOut[idx] = 0.25 * (
+            surfaceIn[idx - 1] + surfaceIn[idx + 1] +
+            surfaceIn[idx - width] + surfaceIn[idx + width]
+        );
+    }
 }
  
 int main(int argc, char *argv[]) {
@@ -49,13 +52,14 @@ int main(int argc, char *argv[]) {
     checkCudaErrors(cudaEventCreate(&startKernel));
     checkCudaErrors(cudaEventCreate(&stopKernel));
 
-    cudaEventRecord(start);
+    checkCudaErrors(cudaEventRecord(start));
 
 	float *d_surface, *d_surfaceNew, *d_temp;
     checkCudaErrors(cudaMalloc((void **)&d_surface, N * N * sizeof(float)));
     checkCudaErrors(cudaMalloc((void **)&d_surfaceNew, N * N * sizeof(float)));
 
     checkCudaErrors(cudaMemcpy(d_surface, h_surface, N * N * sizeof(float), cudaMemcpyHostToDevice));
+    checkCudaErrors(cudaMemcpy(d_surfaceNew, h_surface, N * N * sizeof(float), cudaMemcpyHostToDevice));
 
 	dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 	dim3 grid((N-1)/BLOCK_SIZE+1, (N-1)/BLOCK_SIZE+1);
@@ -72,13 +76,19 @@ int main(int argc, char *argv[]) {
 	checkCudaErrors(cudaEventRecord(stopKernel));
     checkCudaErrors(cudaEventSynchronize(stopKernel));
 	
-	checkCudaErrors(cudaMemcpy(h_surface, d_surfaceNew, N * N * sizeof(float), cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(h_surface, d_surface, N * N * sizeof(float), cudaMemcpyDeviceToHost));
 
 	checkCudaErrors(cudaFree(d_surface));
 	checkCudaErrors(cudaFree(d_surfaceNew));
 
     checkCudaErrors(cudaEventRecord(stop));
-    checkCudaErrors(cudaEventSynchronize(stop));
+    checkCudaErrors(cudaEventSynchronize(stop));    
+
+    unsigned char* img = (unsigned char*)malloc(N * N * sizeof(unsigned char));
+    for(int i = 0; i < N * N; i++)
+        img[i] = 255 - (unsigned char)(h_surface[i] * 255.0 / 100.0);
+   	stbi_write_png("heat1.png", N, N, 1, img, N);
+    free(img);
 
    	free(h_surface);
 

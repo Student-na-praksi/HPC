@@ -1,6 +1,6 @@
-// nvcc -o dotprod3 dotprod3.cu
-// srun --reservation=fri --partition=gpu --gpus=1 ./dotprod3 16777216 256
-// improvement: reduction (increasing stride)
+// nvcc -o dotprod1 dotprod1.cu
+// srun --reservation=fri --partition=gpu --gpus=1 ./dotprod1 16777216 256
+// improvement: reduction in block
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,36 +10,28 @@
 
 #define THREADS_PER_BLOCK_MAX 1024
 
-__global__ void dotprod(float *a, float *b, float *p, int n)
-{
+__global__ void dotprod(float *a, float *b, float *p, int n) {
     __shared__ float part[THREADS_PER_BLOCK_MAX];
 
     part[threadIdx.x] = 0.0;
 
     int tid = blockDim.x * blockIdx.x + threadIdx.x;
-    while (tid < n)
-    {
+    while (tid < n) {
         part[threadIdx.x] += a[tid] * b[tid];
         tid += blockDim.x * gridDim.x;
     }
 
     __syncthreads();
 
-    int idxStep;
-	for(idxStep = 1; idxStep < blockDim.x ; idxStep *= 2 )
-	{
-		if (threadIdx.x % (idxStep*2) == 0)
-			part[threadIdx.x] += part[threadIdx.x+idxStep];
-		__syncthreads();
-	}
-
-    if (threadIdx.x == 0)
-        p[blockIdx.x] = part[0];
-
+    if (threadIdx.x == 0) { 
+        p[blockIdx.x] = 0.0;
+        for(int i=0; i<blockDim.x; i++)
+            p[blockIdx.x] += part[i];
+    }
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
+
     float *h_a, *h_b, *h_p;
     float *d_a, *d_b, *d_p;
 
@@ -58,8 +50,7 @@ int main(int argc, char *argv[])
 
 	// vectors initialization
     srand(time(NULL));
-	for (int i = 0; i < size; i++)
-	{
+	for (int i = 0; i < size; i++) {
 		h_a[i] = (double)rand()/RAND_MAX;
 		h_b[i] = (double)rand()/RAND_MAX;;
 	}
@@ -86,6 +77,7 @@ int main(int argc, char *argv[])
     checkCudaErrors(cudaEventRecord(stop));
     checkCudaErrors(cudaEventSynchronize(stop));
     checkCudaErrors(cudaEventElapsedTime(&elapsedTime, start, stop));
+
 
     // data transfer from device
     checkCudaErrors(cudaMemcpy(h_p, d_p, gridsize.x * sizeof(float), cudaMemcpyDeviceToHost));
