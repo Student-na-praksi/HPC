@@ -4,8 +4,11 @@
 
 - special case of map
   - 1D or multiple dimensions
+
+  <img src="figures/stencil-1D.png" alt="1D stencil" width="60%" />
+
 - has regular data access pattern
-  - each output depends on a neighborhood of inputs
+  - each output depends on a neighborhood of inputs (black)
   - inputs have fixed offsets relative to the output
   - can be implemented as
     - set of random reads for each output
@@ -18,7 +21,7 @@
   - square compact, ..., sparse
   - cache optimizations
   - stencils reuse samples required for neighboring elements
-- boundaries of grids given to a processor
+- boundaries of grids given to a processor (red dashed lines)
   - exchange data with other processors
   - additional communication costs
 
@@ -44,6 +47,8 @@
     - processing goes sequentially from top to bottom to maximize cache reuse
     - multiple of cache line size prevents false sharing between adjacent strips on output
 
+      <img src="figures/stencil-2D.png" alt="2D stencil - vertical strips" width="60%" />
+
 ### Communication
 
 - commonly the output of stencil is used as the input for the next iteration
@@ -54,6 +59,8 @@
   - halo can be exchanged each iteration
   - data exchange can take place on each $k$-th iteration when halo radius is increased, and some redundant computation takes place on each processor
   - latency hiding (update of internal grid cells when waiting for halo exchange)
+
+  <img src="figures/stencil-comm.png" alt="Border exchange strategies" width="80%" />
 
 ### Example: Heat distribution
 
@@ -67,7 +74,10 @@
 
   $T(x, y) = \frac{1}{4} \cdot (T(x-h, y) + T(x+h, y) + T(x, y-h) + T(x, y+h))$
 
-- surface size $N+2$ includes boundary values
+- surface size ```N+2``` includes boundary values, tiles of size ```BLOCK_SIZE+2``` include halo
+
+  <img src="figures/heat-GPU.png" alt="Heat surface arrangment" width="60%" />
+
 - result
 
   <img src="figures/heat.png" alt="Heat distribution" width="50%" />
@@ -102,11 +112,17 @@
     - not required, but enables additional reorderings
   - identity
     - initial value of reduction
+- serial and parallel patterns
+
+  <img src="figures/reduce-ser-par.png" alt="Serial and parallel reduce" width="75%" />
 
 ### Tiling
 
 - use serial algorithm where possible
 - do tree-like reduction to reduce communication costs
+
+  <img src="figures/reduce-tiling.png" alt="Reduce with tiling" width="75%" />
+
 - process
   - break the work to tiles
   - operate on tiles separately
@@ -134,6 +150,8 @@
 - no need to write intermediate results to memory or file
 - map and reduce must be tiled in a same way
 
+  <img src="figures/map-reduce.png" alt="Fused map reduce" width="75%" />
+
 ### Example: Dot Product
 
 - vectors $\mathbf{a}$ and $\mathbf{b}$ of length $N$
@@ -143,26 +161,30 @@
 
 - solutions
   - [dotprod0.cu](files/2-reduce/dotprod0.cu): CPU reference code
-  - [dotprod1.cu](files/2-reduce/dotprod1.cu):
-    - element-wise multiplication is performed on GPU, summation on CPU
-  - [dotprod2.cu](files/2-reduce/dotprod2.cu):
-    - summation of partial results on CPU (less data to transfer back)
+  - [dotprod1.cu](files/2-reduce/dotprod1.cu): element-wise multiplication is performed on GPU, summation on CPU
+  - [dotprod2.cu](files/2-reduce/dotprod2.cu): summation split between GPU and CPU
+    - less data to transfer back to CPU
     - local memory to store products
     - serial summation of products from local memory inside a block thread
-  - [dotprod3.cu](files/2-reduce/dotprod3.cu):
-    - tree-like summation of values inside a block, stride is increasing
-  - [dotprod4.cu](files/2-reduce/dotprod4.cu):
+
+      <img src="figures/reduce-GPU.png" alt="Reduce on GPU - thread organization" width="75%" />
+
+  - [dotprod3.cu](files/2-reduce/dotprod3.cu): tree-like summation of values inside a block, stride is increasing
+    - in each stage the number of working threads inside a warp decreases
+
+      <img src="figures/reduce-tree-inc.png" alt="Reduce on threads in a block, increasing stride" width="75%" />
+
+  - [dotprod4.cu](files/2-reduce/dotprod4.cu): better warp managements
     - tree-like summation of values inside a block, stride is decreasing
-    - better warp management, considerably improved performance
-  - [dotprod5.cu](files/2-reduce/dotprod5.cu):
-    - for threads inside the final warp we use light-weight barrier with ```__syncwarp()```
-  - [dotprod6.cu](files/2-reduce/dotprod6.cu):
-    - generalization of solution to support block sizes not power of $2$
-  - [dotprod7.cu](files/2-reduce/dotprod7.cu):
-    - trick to compute largest power of $2$ smaller or equal to the block size
-  - [dotprod8.cu](files/2-reduce/dotprod8.cu):
-    - atomic add, no summation on CPU
-  - [dotprod9.cu](files/2-reduce/dotprod9.cu):
-    - dynamic allocation of local memory
-  - [dotprodA.cu](files/2-reduce/dotprodA.cu):
-    - managed memory solution
+    - all threads in a warp are working (up to the last warp)
+    - at each stage the number of warps halves
+    - considerably improved performance
+
+      <img src="figures/reduce-tree-dec.png" alt="Reduce on threads in a block, decreasing stride" width="75%" />
+
+  - [dotprod5.cu](files/2-reduce/dotprod5.cu): for threads inside the final warp we use light-weight barrier with ```__syncwarp()```
+  - [dotprod6.cu](files/2-reduce/dotprod6.cu): generalization of solution to support block sizes not power of $2$
+  - [dotprod7.cu](files/2-reduce/dotprod7.cu): trick to compute largest power of $2$ smaller or equal to the block size
+  - [dotprod8.cu](files/2-reduce/dotprod8.cu): atomic add, no summation on CPU
+  - [dotprod9.cu](files/2-reduce/dotprod9.cu): dynamic allocation of local memory
+  - [dotprodA.cu](files/2-reduce/dotprodA.cu): managed memory solution
