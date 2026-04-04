@@ -5,7 +5,7 @@
 - special case of map
   - 1D or multiple dimensions
 
-  <img src="figures/stencil-1D.png" alt="1D stencil" width="60%" />
+  <img src="figures/stencil-1D.png" alt="1D stencil" width="50%" />
 
 - has regular data access pattern
   - each output depends on a neighborhood of inputs (black)
@@ -47,7 +47,7 @@
     - processing goes sequentially from top to bottom to maximize cache reuse
     - multiple of cache line size prevents false sharing between adjacent strips on output
 
-      <img src="figures/stencil-2D.png" alt="2D stencil - vertical strips" width="60%" />
+      <img src="figures/stencil-2D.png" alt="2D stencil - vertical strips" width="50%" />
 
 ### Communication
 
@@ -60,7 +60,7 @@
   - data exchange can take place on each $k$-th iteration when halo radius is increased, and some redundant computation takes place on each processor
   - latency hiding (update of internal grid cells when waiting for halo exchange)
 
-  <img src="figures/stencil-comm.png" alt="Border exchange strategies" width="80%" />
+  <img src="figures/stencil-comm.png" alt="Border exchange strategies" width="90%" />
 
 ### Example: Heat distribution
 
@@ -76,7 +76,7 @@
 
 - surface size ```N+2``` includes boundary values, tiles of size ```BLOCK_SIZE+2``` include halo
 
-  <img src="figures/heat-GPU.png" alt="Heat surface arrangment" width="60%" />
+  <img src="figures/heat-GPU.png" alt="Heat surface arrangement" width="50%" />
 
 - result
 
@@ -150,7 +150,7 @@
 - no need to write intermediate results to memory or file
 - map and reduce must be tiled in a same way
 
-  <img src="figures/map-reduce.png" alt="Fused map reduce" width="75%" />
+  <img src="figures/map-reduce.png" alt="Fused map reduce" width="60%" />
 
 ### Example: Dot Product
 
@@ -167,7 +167,7 @@
     - local memory to store products
     - serial summation of products from local memory inside a block thread
 
-      <img src="figures/reduce-GPU.png" alt="Reduce on GPU - thread organization" width="75%" />
+      <img src="figures/reduce-GPU.png" alt="Reduce on GPU - thread organization" width="90%" />
 
   - [dotprod3.cu](files/2-reduce/dotprod3.cu): tree-like summation of values inside a block, stride is increasing
     - in each stage the number of working threads inside a warp decreases
