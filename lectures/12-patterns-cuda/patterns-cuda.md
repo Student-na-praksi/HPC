@@ -193,6 +193,9 @@
 
 - also prefix scan
 - produces all partial reductions of an input sequence
+
+  <img src="figures/scan-ser-inc.png" alt="Serial inclusive scan" width="60%" />
+
 - exclusive and inclusive scan
 - operation
   - input sequence: 
@@ -226,6 +229,7 @@
 
 ### Two-phase parallel scan
 
+- Blelloch
 - tree-like approach
 - requires only one buffer of length $N$
 - more synchronizations
@@ -233,7 +237,7 @@
   - stride increases: $0, \ldots, \lfloor\log_2 N\rfloor - 1$
   - see displacements of elements used in computation in figure below
 - second phase
-  - stride decreeases: $\lfoor\log_2 N\rfloor - 1, \ldots, 0$
+  - stride decreases: $\lfloor\log_2 N\rfloor - 1, \ldots, 0$
   - see displacements of elements used in computation in figure below
 
   <img src="figures/scan-two-phase.png" alt="Two-phase parallel scan" width="90%" />
@@ -252,7 +256,7 @@
 
 - tiled scan approach where size of a tile equals block size
 - ```blockSum``` in GPU global memory holds the value of last element in each tile
-- ```blockSum``` is a result of the ```scan``` kernel and is used by the ``àdd```kernel to compute offsets
+- ```blockSum``` is a result of the ```scan``` kernel and is used by the ```add```kernel to compute offsets
 - local memory
   - due to CUDA C limitations can hold only one structure
   - double length array

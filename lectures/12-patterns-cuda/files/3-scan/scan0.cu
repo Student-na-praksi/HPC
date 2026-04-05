@@ -13,39 +13,40 @@
 // kernels
 __global__ void scan(float *in, float *out, float *blockSum, int size) {		
     
-	__shared__ float loc[2*THREADS_PER_BLOCK];
+	__shared__ float tile[2*THREADS_PER_BLOCK];
 
 	int lid = threadIdx.x;
 	int gid = blockDim.x * blockIdx.x + threadIdx.x;
-	int dIn = 0;			// displacement of local input array in loc
-	int dOut = blockDim.x;	// displacement of local output array in loc
+	int dIn = 0;			// displacement of local input array in tile
+	int dOut = blockDim.x;	// displacement of local output array in tile
 
 	// Read to local memory
 	if (gid < size)
-		loc[dIn + lid] = in[gid];
+		tile[dIn + lid] = in[gid];	
 	else
-		loc[dIn + lid] = 0.0f;
-	loc[dOut + lid] = 0.0f;
+		tile[dIn + lid] = 0.0f;
+	tile[dOut + lid] = 0.0f;
 
 	__syncthreads();
 
 	// only thread 0 works
 	if (lid == 0) {
-		loc[dOut + 0] = loc[dIn + 0];
+		tile[dOut + 0] = tile[dIn + 0];
 		for (int i = 1; i < blockDim.x; i++)	
-			loc[dOut + i] = loc[dOut + i - 1] + loc[dIn + i];
+			tile[dOut + i] = tile[dOut + i - 1] + tile[dIn + i];
 	}
 
 	__syncthreads();
 
 	if (gid < size)
-		out[gid] = loc[dOut + lid];
+		out[gid] = tile[dOut + lid];
 
 	if (lid == 0)
-		blockSum[blockIdx.x] = loc[dOut + blockDim.x - 1];
+		blockSum[blockIdx.x] = tile[dOut + blockDim.x - 1];
 }														
 
 __global__ void add(float *out, float *blockSum, int size) {		
+	
 	__shared__ float sum;
 
 	int lid = threadIdx.x;
