@@ -169,11 +169,25 @@
   - transfer of more operands from memory
   - computation on more operands at the same time
 - floating-point number formats
-  - double precision: FP64
-  - single precision: FP32
-  - tensor float: TF32
-  - half-precision: FP16, BF16
-  - quarter precision: FP8
-  - FP6, FP4
+  - double precision: ```double``` (FP64)
+  - single precision: ```float``` (FP32)
+  - tensor float: ```tf32```
+  - half-precision: ```half``` (FP16)), ```bf16```
+  - quarter precision: ```fp8```
+  - FP6, FP4, ...
 
-<img src="figures/FP-formats.png" alt="Floating point formats in modern GPUs" width="75%" />
+  <img src="figures/FP-formats.png" alt="Floating point formats in modern GPUs" width="75%" />
+
+- solutions
+  - [mmhp.cu](files/mmhp.cu): tiled approach using half precision
+  - [mmtc.cu](files/mmtc.cu): tiled approach using tensor cores
+    - WMMA API (warp matrix multiply accumulate, a C++ library)
+    - Nvidia V100 supports tensor core multiplication of tiles $16\times\16$, $32\times 8$, $8\times 32$ with inner dimension (scalar product) of $16$ elements
+    - in parallel we compute tiles of size $32\times 32$ in the resulting matrix
+    - in the solution 1D block of 128 threads contains 4 warps, which we arrange in $2\times 2$ grid of $16\times 16$ subtiles
+    - computation follows the same idea as before, a bit more complex with additional split to subtiles
+    - whole warp must work on multiplication of $16\times 16$ subtiles
+      - tensor cores work with fragments - registers structures for storing matrices
+      - each thread in a warp holds a private slice of a fragment, all 32 threads must work together
+      - we can only work with fragments through WMMA API
+    - as inner dimension supported by tensor cores is $16$, we declare rectangular tiles of sizes $32\times 16$ and $16\times 32$

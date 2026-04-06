@@ -1,5 +1,5 @@
 // nvcc -Xcompiler -fopenmp -o mm0 mm0.cu
-// srun --reservation=fri --partition=gpu --gpus=1 ./mm0
+// srun --reservation=fri --partition=gpu --gpus=1 ./mm0 2048
 // simple algorithm
 
 #include <stdio.h>
@@ -11,7 +11,6 @@
 #include "helper_cuda.h"
 
 
-#define SIZE 		2048
 #define BLOCK_SIZE	16
 
 
@@ -31,11 +30,13 @@ __global__ void matrixMultiply(float *A, float *B, float *C, int wA, int hA, int
 
 // cpu main routine
 int main(int argc, char *argv[]) {
+
+	int size = atoi(argv[1]);
 	
-	int hA = SIZE;
-	int wA = SIZE;
+	int hA = size;
+	int wA = size;
 	int hB = wA;
-	int wB = SIZE;
+	int wB = size;
 
 	// memory allocation
 	float *h_A = (float *)malloc(hA*wA*sizeof(float));
@@ -73,7 +74,7 @@ int main(int argc, char *argv[]) {
     checkCudaErrors(cudaEventCreate(&start));
     checkCudaErrors(cudaEventCreate(&stop));
 
-	dim3 gridSize((hA-1)/BLOCK_SIZE+1, (wB-1)/BLOCK_SIZE+1);
+	dim3 gridSize((wB-1)/BLOCK_SIZE+1, (hA-1)/BLOCK_SIZE+1);
 	dim3 blockSize(BLOCK_SIZE, BLOCK_SIZE);
     checkCudaErrors(cudaEventRecord(start));
     matrixMultiply<<<gridSize, blockSize>>>(d_A, d_B, d_C, hA, wA, hB, wB);
@@ -96,7 +97,7 @@ int main(int argc, char *argv[]) {
 
     // results host
 	double h_dt = omp_get_wtime();
-	if (argc > 1)
+	if (argc > 2)
 		for(int i=0; i<hA; i++)
 			for(int j=0; j<wB; j++)
 				for(int k=0; k<wA; k++)
