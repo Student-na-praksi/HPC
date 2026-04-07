@@ -1,6 +1,6 @@
-// nvcc -Xcompiler -fopenmp -o mm-1 mm-1.cu
-// srun --reservation=fri --partition=gpu --gpus=1 ./mm-1
-// block multiplication algorithm -- warp assigment DOES NOT match row-major matrix format
+// nvcc -Xcompiler -fopenmp -o mm1 mm1.cu
+// srun --reservation=fri --partition=gpu --gpus=1 ./mm1 2048
+// block multiplication algorithm -- warp assignment matches row-major matrix format 
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,35 +11,34 @@
 #include "helper_cuda.h"
 
 
-#define SIZE 				2048
-#define THREADS_PER_BLOCK	16
+#define BLOCK_SIZE	16
 
 
 // gpu kernel
-__global__ void matrixMultiply(float *A, float *B, float *C, int widthA, int heightA, int widthB, int heightB)						
-{
- 	// shared memory allocation
-    __shared__ float s_A[THREADS_PER_BLOCK][THREADS_PER_BLOCK];
-    __shared__ float s_B[THREADS_PER_BLOCK][THREADS_PER_BLOCK];
+__global__ void matrixMultiply(float *A, float *B, float *C, int wA, int hA, int wB, int hB) {
 
-   // block index
-    int bj = blockIdx.y;
-    int bi = blockIdx.x;
+    // shared memory allocation
+    __shared__ float tileA[BLOCK_SIZE][BLOCK_SIZE];
+    __shared__ float tileB[BLOCK_SIZE][BLOCK_SIZE];
+
+    // block index
+    int bi = blockIdx.y;
+    int bj = blockIdx.x;
  
     // thread index
-    int tj = threadIdx.y;
-    int ti = threadIdx.x;
+    int ti = threadIdx.y;
+    int tj = threadIdx.x;
  
     // first element in a row of matrix A
-    int aBegin = widthA * (THREADS_PER_BLOCK * bi);
+    int aBegin = wA * (BLOCK_SIZE * bi);
     // first element in a row + 1
-    int aEnd   = aBegin + widthA;
+    int aEnd   = aBegin + wA;
 	// step size (block) 
-    int aStep  = THREADS_PER_BLOCK;
+    int aStep  = BLOCK_SIZE;
     // first element in a block of matrix B
-    int bBegin = THREADS_PER_BLOCK * bj;
+    int bBegin = BLOCK_SIZE * bj;
     // step to the first element in the next block of B
-    int bStep  = THREADS_PER_BLOCK * widthB;
+    int bStep  = BLOCK_SIZE * wB;
 	// first element in a block of matrix C
     int cBegin = bStep * bi + aStep * bj;
   
@@ -47,33 +46,35 @@ __global__ void matrixMultiply(float *A, float *B, float *C, int widthA, int hei
 	float sum = 0.0f;
 
     // go over all blocks of A and B
-    for (int a = aBegin, b = bBegin; a < aEnd; a += aStep, b += bStep) 
-    {
-		// transfer data to the shared memory
-        s_A[ti][tj] = A[a + widthA * ti + tj];
-        s_B[ti][tj] = B[b + widthB * ti + tj];
+    for (int a = aBegin, b = bBegin; a < aEnd; a += aStep, b += bStep) {
+		
+        // transfer data to the shared memory
+        tileA[ti][tj] = A[a + wA * ti + tj];
+        tileB[ti][tj] = B[b + wB * ti + tj];
  
 		__syncthreads();
- 
+        
 		// multiply blocks in the shared memory
-        for (int k = 0; k < THREADS_PER_BLOCK; k++)
-            sum += s_A[ti][k] * s_B[k][tj];
+        for (int k = 0; k < BLOCK_SIZE; k++)
+            sum += tileA[ti][k] * tileB[k][tj];
 		
 		__syncthreads();
     }
 
 	// write the result to the global memory
-    C[cBegin + widthB * ti + tj] = sum;
+    C[cBegin + wB * ti + tj] = sum;
 }
 
 
 // cpu main routine
-int main(int argc, char *argv[]) 
-{
-	int hA = SIZE;
-	int wA = SIZE;
+int main(int argc, char *argv[]) {
+    
+	int size = atoi(argv[1]);
+	
+	int hA = size;
+	int wA = size;
 	int hB = wA;
-	int wB = SIZE;
+	int wB = size;
 
 	// memory allocation
 	float *h_A = (float *)malloc(hA*wA*sizeof(float));
@@ -111,11 +112,10 @@ int main(int argc, char *argv[])
     checkCudaErrors(cudaEventCreate(&start));
     checkCudaErrors(cudaEventCreate(&stop));
 
-	dim3 gridsize((hA-1)/THREADS_PER_BLOCK+1, (wB-1)/THREADS_PER_BLOCK+1);
-	dim3 blocksize(THREADS_PER_BLOCK, THREADS_PER_BLOCK);
-    
+	dim3 gridSize((wB-1)/BLOCK_SIZE+1, (hA-1)/BLOCK_SIZE+1);
+	dim3 blockSize(BLOCK_SIZE, BLOCK_SIZE);
     checkCudaErrors(cudaEventRecord(start));
-    matrixMultiply<<<gridsize, blocksize>>>(d_A, d_B, d_C, hA, wA, hB, wB);
+    matrixMultiply<<<gridSize, blockSize>>>(d_A, d_B, d_C, hA, wA, hB, wB);
     checkCudaErrors(cudaGetLastError());
     checkCudaErrors(cudaEventRecord(stop));
     checkCudaErrors(cudaEventSynchronize(stop));
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
 
     // results host
 	double h_dt = omp_get_wtime();
-    if (argc > 1)
+    if (argc > 2)
         for(int i=0; i<hA; i++)
             for(int j=0; j<wB; j++)
                 for(int k=0; k<wA; k++)

@@ -138,7 +138,7 @@
   - each invocation of reduce function needs $\chi$ to complete
   - total execution time is $t_s = \chi (N-1)$
 - parallel tree-like reduction, $n=2^k, k\in \mathbb{N}$
-  - establishing communication takes $\lambda$ units of time 
+  - establishing communication takes $\lambda$ units of time
   - $N/2$ reductions in the first stage can go in parallel, $N/4$ in the second stage can go in parallel ... $1$ reduction in the last stage
   - altogether we have $\log_2 N$ stages with total $N-1$ reductions
   - total execution time equals $t_p = (\chi+\lambda)\log_2 N$
@@ -198,7 +198,7 @@
 
 - exclusive and inclusive scan
 - operation
-  - input sequence: 
+  - input sequence:
     $[𝑎_0, 𝑎_1, 𝑎_2, ..., 𝑎_(N−1)]$
   - output:
     - exclusive scan: $[I, a_0, a_0 \oplus a_1, a_0 \oplus a_1 \oplus a_2, \ldots, a_0 \oplus \cdots \oplus a_{N-2}]$
@@ -258,10 +258,9 @@
 - ```blockSum``` in GPU global memory holds the value of last element in each tile
 - ```blockSum``` is a result of the ```scan``` kernel and is used by the ```add```kernel to compute offsets
 - local memory
-  - due to CUDA C limitations can hold only one structure
-  - double length array
-  - as there is no pointers in CUDA C, we use two indices ```dIn``` and ```dOut``` to determine input and output buffer
- 
+  - double length array presents input and output buffer
+  - as there is no pointers in CUDA C, we use two displacements ```dIn``` and ```dOut``` to determine beginning of the input and output part of the buffer
+
   <img src="figures/scan-double-buffering-gpu.png" alt="Double buffering in local memory with CUDA C" width="30%" />
 
 - solutions for inclusive scan
