@@ -30,10 +30,10 @@ __global__ void scan(float *in, float *out, float *blockSum, int size) {
 
 	__syncthreads();
 
-	for (int offset = 1; offset < size; offset <<= 1) {
+	for (int step = 1; step < size; step <<= 1) {
 		tile[dOut + lid] = tile[dIn + lid];
-		if(lid >= offset)
-			tile[dOut + lid] += tile[dIn + lid - offset];
+		if(lid >= step)
+			tile[dOut + lid] += tile[dIn + lid - step];
 
 		__syncthreads();
 

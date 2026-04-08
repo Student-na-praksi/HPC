@@ -193,6 +193,7 @@
 
 - also prefix scan
 - produces all partial reductions of an input sequence
+- associativity must hold as with reduction
 
   <img src="figures/scan-ser-inc.png" alt="Serial inclusive scan" width="45%" />
 
@@ -212,7 +213,7 @@
   - loop-carried dependence
   - similar to reduce
   - two solutions
-    - Count on associativity of the combiner function ($\oplus$)
+    - count on associativity of the combiner function ($\oplus$)
 - combining scan
   - map
     - tiled scan: map can be applied before the first stage and/or after the last stage
