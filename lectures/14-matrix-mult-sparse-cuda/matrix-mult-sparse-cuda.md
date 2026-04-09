@@ -46,7 +46,7 @@
   - row, and
   - column information
 
-  <img src="figures/COO.png" alt="Sparse matrix representation: COO" width="30%" />
+  <img src="figures/COO.png" alt="Sparse matrix representation: COO" width="20%" />
 
   ```C
   data[7] = (1, 2, 5, 4, 3, 6, 7)
@@ -80,7 +80,7 @@
     - number of elements in a row  = row_ptr[r+1] – row_ptr[r]
   - ```row_ptr[r]``` of a non-existing row points to a data element where it would start
 
-  <img src="figures/CSR.png" alt="Sparse matrix representation: CSR" width="50%" />
+  <img src="figures/CSR.png" alt="Sparse matrix representation: CSR" width="45%" />
 
   ```C
   data[7]   = (1, 2, 5, 4, 3, 6, 7)
@@ -130,7 +130,7 @@
   - structures become larger
   - star ```*``` indicates inserted elements (```0```) in the ```col``` array
 
-  <img src="figures/ELL.png" alt="Sparse matrix representation: ELL" width="75%" />
+  <img src="figures/ELL.png" alt="Sparse matrix representation: ELL" width="90%" />
 
   ```C
   data[12] = (1, 2, 0, 5, 4, 3, 0, 0, 0, 6, 7, 0)
