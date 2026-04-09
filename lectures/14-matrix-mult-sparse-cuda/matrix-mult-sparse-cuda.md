@@ -46,7 +46,7 @@
   - row, and
   - column information
 
-  <img src="figures/COO.png" alt="Sparse matrix representation: COO" width="40%" />
+  <img src="figures/COO.png" alt="Sparse matrix representation: COO" width="30%" />
 
   ```C
   data[7] = (1, 2, 5, 4, 3, 6, 7)
@@ -80,7 +80,7 @@
     - number of elements in a row  = row_ptr[r+1] – row_ptr[r]
   - ```row_ptr[r]``` of a non-existing row points to a data element where it would start
 
-  <img src="figures/CSR.png" alt="Sparse matrix representation: CSR" width="75%" />
+  <img src="figures/CSR.png" alt="Sparse matrix representation: CSR" width="60%" />
 
   ```C
   data[7]   = (1, 2, 5, 4, 3, 6, 7)
@@ -130,11 +130,11 @@
   - structures become larger
   - star ```*``` indicates inserted elements (```0```) in the ```col``` array
 
-  <img src="figures/ELLpng" alt="Sparse matrix representation: ELL" width="75%" />
+  <img src="figures/ELL.png" alt="Sparse matrix representation: ELL" width="75%" />
 
   ```C
-  data[12] = (\underline{1}, 2, 0, \underline{5}, 4, 3, \underline{0}, 0, 0, \underline{6}, 7, 0)
-  col[12]  = (\underline{0}, 2, *, \underline{1}, 2, 3, \underline{*}, *, *, \underline{1}, 2, *)
+  data[12] = (1, 2, 0, 5, 4, 3, 0, 0, 0, 6, 7, 0)
+  col[12]  = (0, 2, *, 1, 2, 3, *, *, *, 1, 2, *)
   ```
 
 - matrix transposition
@@ -194,4 +194,4 @@
 - no need for CPU computation
 - better suited for sparse matrices with a wide distribution of row lengths
 
-<img src="figures/JDS.png" alt="Sparse matrix representation: JDS" width="75%" />
+<img src="figures/JDS.png" alt="Sparse matrix representation: JDS" width="60%" />
