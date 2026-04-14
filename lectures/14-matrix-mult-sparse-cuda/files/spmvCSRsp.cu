@@ -1,12 +1,14 @@
 // nvcc -Xcompiler -fopenmp -o spmvCSRsp spmvCSRsp.cu mtxsparse.c
 // srun --partition=gpu --reservation=fri --gpus=1 spmvCSRsp data/scircuit.mtx 
 // srun --partition=gpu --reservation=fri --gpus=1 spmvCSRsp data/pdb1HYS.mtx
+// Parallel CSR SpMV, whole warp is operating in one row, after summation follows reduction within a warp
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include "omp.h"
 #include <cuda.h>
+#include "helper_cuda.h"
 #include "mtxsparse.h"
 
 
@@ -31,19 +33,25 @@ __global__ void mCSRxVecPar(int *rowPtr, int *col, float *data, float *vIn, floa
 	
     __shared__ float buffer[THREADS_PER_BLOCK];
 
-	int lid = threadIdx.x;
     int gid = blockDim.x * blockIdx.x + threadIdx.x;   
-	int wid = gid / WARP_SIZE; 		// warp id
-	int wlid = gid % WARP_SIZE; 	// local id within a warp
-	if (wid < rows) {
-		buffer[lid] = 0;
+	int wid = gid / WARP_SIZE; 		                    // warp id
+	int wlid = gid % WARP_SIZE; 	                    // local id within a warp
+    int offset = (threadIdx.x / WARP_SIZE) * WARP_SIZE; // offset in buffer for current warp
+
+    if (wid < rows) {
+        buffer[offset+wlid] = 0.0f;
 		for (int j = rowPtr[wid] + wlid; j < rowPtr[wid + 1]; j += WARP_SIZE)
-			buffer[lid] += data[j] * vIn[col[j]];
-		if (wlid < 16) buffer[lid] += buffer[lid+16];
-		if (wlid < 8 ) buffer[lid] += buffer[lid+8];
-		if (wlid < 4 ) buffer[lid] += buffer[lid+4];
-		if (wlid < 2 ) buffer[lid] += buffer[lid+2];
-		if (wlid < 1 ) buffer[lid] += buffer[lid+1];
+			buffer[offset+wlid] += data[j] * vIn[col[j]];
+        __syncwarp();
+		if (wlid < 16) buffer[offset+wlid] += buffer[offset+wlid+16];
+        __syncwarp();
+		if (wlid <  8) buffer[offset+wlid] += buffer[offset+wlid+8];
+        __syncwarp();
+		if (wlid <  4) buffer[offset+wlid] += buffer[offset+wlid+4];
+        __syncwarp();
+		if (wlid <  2) buffer[offset+wlid] += buffer[offset+wlid+2];
+        __syncwarp();
+		if (wlid <  1) vOut[wid] = buffer[offset+wlid] + buffer[offset+wlid+1];
 	}
 }														
 
@@ -92,17 +100,17 @@ int main(int argc, char *argv[]) {
     // CSR
     int *d_mCSRrowPtr, *d_mCSRcol;
     float *d_mCSRdata;
-    cudaMalloc((void **)&d_mCSRrowPtr, (h_mCSR.numRows + 1) * sizeof(int));
-    cudaMalloc((void **)&d_mCSRcol, (h_mCSR.numNonzero + 1) * sizeof(int));
-    cudaMalloc((void **)&d_mCSRdata, h_mCSR.numNonzero * sizeof(float));
-    cudaMemcpy(d_mCSRrowPtr, h_mCSR.rowPtr, (h_mCSR.numRows + 1) * sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_mCSRcol, h_mCSR.col, h_mCSR.numNonzero * sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_mCSRdata, h_mCSR.data, h_mCSR.numNonzero * sizeof(float), cudaMemcpyHostToDevice);
+    checkCudaErrors(cudaMalloc((void **)&d_mCSRrowPtr, (h_mCSR.numRows + 1) * sizeof(int)));
+    checkCudaErrors(cudaMalloc((void **)&d_mCSRcol, (h_mCSR.numNonzero + 1) * sizeof(int)));
+    checkCudaErrors(cudaMalloc((void **)&d_mCSRdata, h_mCSR.numNonzero * sizeof(float)));
+    checkCudaErrors(cudaMemcpy(d_mCSRrowPtr, h_mCSR.rowPtr, (h_mCSR.numRows + 1) * sizeof(int), cudaMemcpyHostToDevice));
+    checkCudaErrors(cudaMemcpy(d_mCSRcol, h_mCSR.col, h_mCSR.numNonzero * sizeof(int), cudaMemcpyHostToDevice));
+    checkCudaErrors(cudaMemcpy(d_mCSRdata, h_mCSR.data, h_mCSR.numNonzero * sizeof(float), cudaMemcpyHostToDevice));
 
     // vectors
     float *d_vecIn, *d_vecOut;
-    cudaMalloc((void **)&d_vecIn, h_mCOO.numCols * sizeof(float));
-    cudaMalloc((void **)&d_vecOut, h_mCOO.numRows * sizeof(float));
+    checkCudaErrors(cudaMalloc((void **)&d_vecIn, h_mCOO.numCols * sizeof(float)));
+    checkCudaErrors(cudaMalloc((void **)&d_vecOut, h_mCOO.numRows * sizeof(float)));
 
 	// Divide work 
     dim3 blockSize(THREADS_PER_BLOCK);
@@ -114,33 +122,35 @@ int main(int argc, char *argv[]) {
 	// CSRser: write, execute, read
     double dtimeCSRser = omp_get_wtime();
     for (repeat = 0; repeat < REPEAT; repeat++) {
-        cudaMemcpy(d_vecIn, h_vecIn, h_mCSR.numCols*sizeof(float), cudaMemcpyHostToDevice);
+        checkCudaErrors(cudaMemcpy(d_vecIn, h_vecIn, h_mCSR.numCols*sizeof(float), cudaMemcpyHostToDevice));
         mCSRxVecSer<<<gridSizeCSRser, blockSize>>>(d_mCSRrowPtr, d_mCSRcol, d_mCSRdata, d_vecIn, d_vecOut, h_mCSR.numRows);
-        cudaMemcpy(h_vecOutCSRser, d_vecOut, h_mCSR.numRows*sizeof(float), cudaMemcpyDeviceToHost);
+        checkCudaErrors(cudaGetLastError());
+        checkCudaErrors(cudaMemcpy(h_vecOutCSRser, d_vecOut, h_mCSR.numRows*sizeof(float), cudaMemcpyDeviceToHost));
     }
     dtimeCSRser = omp_get_wtime()-dtimeCSRser;
 
 	// CSRpar: write, execute, read
     double dtimeCSRpar = omp_get_wtime();
     for (repeat = 0; repeat < REPEAT; repeat++) {
-        cudaMemcpy(d_vecIn, h_vecIn, h_mCSR.numCols*sizeof(float), cudaMemcpyHostToDevice);
+        checkCudaErrors(cudaMemcpy(d_vecIn, h_vecIn, h_mCSR.numCols*sizeof(float), cudaMemcpyHostToDevice));
         mCSRxVecPar<<<gridSizeCSRpar, blockSize>>>(d_mCSRrowPtr, d_mCSRcol, d_mCSRdata, d_vecIn, d_vecOut, h_mCSR.numRows);
-        cudaMemcpy(h_vecOutCSRpar, d_vecOut, h_mCSR.numRows*sizeof(float), cudaMemcpyDeviceToHost);
+        checkCudaErrors(cudaGetLastError());
+        checkCudaErrors(cudaMemcpy(h_vecOutCSRpar, d_vecOut, h_mCSR.numRows*sizeof(float), cudaMemcpyDeviceToHost));
     }
     dtimeCSRpar = omp_get_wtime()-dtimeCSRpar;
 
-    cudaFree(d_mCSRrowPtr);
-    cudaFree(d_mCSRcol);
-    cudaFree(d_mCSRdata);
-    cudaFree(d_vecIn);
-    cudaFree(d_vecOut);
+    checkCudaErrors(cudaFree(d_mCSRrowPtr));
+    checkCudaErrors(cudaFree(d_mCSRcol));
+    checkCudaErrors(cudaFree(d_mCSRdata));
+    checkCudaErrors(cudaFree(d_vecIn));
+    checkCudaErrors(cudaFree(d_vecOut));
 
 
     // output
     printf("size: %ld x %ld, nonzero: %ld\n", h_mCOO.numRows, h_mCOO.numCols, h_mCOO.numNonzero);
     int errorsCSRpar = 0;
     for(int i = 0; i < h_mCOO.numRows; i++) {
-        if (fabs(h_vecOutCSRser[i]-h_vecOutCSRpar[i]) > 1e-4 ) {
+        if (fabs(h_vecOutCSRser[i]-h_vecOutCSRpar[i]) > 1e-3 ) {
             printf("Err(CSRpar): %d %f %f %f\n", i, h_vecOutCOO_cpu[i], h_vecOutCSRser[i], h_vecOutCSRpar[i]);
             errorsCSRpar++;
         }

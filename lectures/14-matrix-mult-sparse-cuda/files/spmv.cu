@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "omp.h"
 #include <cuda.h>
+#include "helper_cuda.h"
 #include "mtxsparse.h"
 
 
@@ -110,25 +111,25 @@ int main(int argc, char *argv[]) {
     // CSR
     int *d_mCSRrowPtr, *d_mCSRcol;
     float *d_mCSRdata;
-    cudaMalloc((void **)&d_mCSRrowPtr, (h_mCSR.numRows + 1) * sizeof(int));
-    cudaMalloc((void **)&d_mCSRcol, (h_mCSR.numNonzero + 1) * sizeof(int));
-    cudaMalloc((void **)&d_mCSRdata, h_mCSR.numNonzero * sizeof(float));
-    cudaMemcpy(d_mCSRrowPtr, h_mCSR.rowPtr, (h_mCSR.numRows + 1) * sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_mCSRcol, h_mCSR.col, h_mCSR.numNonzero * sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_mCSRdata, h_mCSR.data, h_mCSR.numNonzero * sizeof(float), cudaMemcpyHostToDevice);
+    checkCudaErrors(cudaMalloc((void **)&d_mCSRrowPtr, (h_mCSR.numRows + 1) * sizeof(int)));
+    checkCudaErrors(cudaMalloc((void **)&d_mCSRcol, (h_mCSR.numNonzero + 1) * sizeof(int)));
+    checkCudaErrors(cudaMalloc((void **)&d_mCSRdata, h_mCSR.numNonzero * sizeof(float)));
+    checkCudaErrors(cudaMemcpy(d_mCSRrowPtr, h_mCSR.rowPtr, (h_mCSR.numRows + 1) * sizeof(int), cudaMemcpyHostToDevice));
+    checkCudaErrors(cudaMemcpy(d_mCSRcol, h_mCSR.col, h_mCSR.numNonzero * sizeof(int), cudaMemcpyHostToDevice));
+    checkCudaErrors(cudaMemcpy(d_mCSRdata, h_mCSR.data, h_mCSR.numNonzero * sizeof(float), cudaMemcpyHostToDevice));
     // ELL
     int *d_mELLcol;
     float *d_mELLdata;
-    cudaMalloc((void **)&d_mELLcol, h_mELL.numElements * sizeof(int));
-    cudaMalloc((void **)&d_mELLdata, h_mELL.numElements * sizeof(float));
-    cudaMemcpy(d_mELLcol, h_mELL.col, h_mELL.numElements * sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_mELLdata, h_mELL.data, h_mELL.numElements * sizeof(float), cudaMemcpyHostToDevice);
+    checkCudaErrors(cudaMalloc((void **)&d_mELLcol, h_mELL.numElements * sizeof(int)));
+    checkCudaErrors(cudaMalloc((void **)&d_mELLdata, h_mELL.numElements * sizeof(float)));
+    checkCudaErrors(cudaMemcpy(d_mELLcol, h_mELL.col, h_mELL.numElements * sizeof(int), cudaMemcpyHostToDevice));
+    checkCudaErrors(cudaMemcpy(d_mELLdata, h_mELL.data, h_mELL.numElements * sizeof(float), cudaMemcpyHostToDevice));
 
     // vectors
     float *d_vecIn, *d_vecOut;
-    cudaMalloc((void **)&d_vecIn, h_mCOO.numCols * sizeof(float));
-    cudaMalloc((void **)&d_vecOut, h_mCOO.numRows * sizeof(float));
-  
+    checkCudaErrors(cudaMalloc((void **)&d_vecIn, h_mCOO.numCols * sizeof(float)));
+    checkCudaErrors(cudaMalloc((void **)&d_vecOut, h_mCOO.numRows * sizeof(float)));
+
 	// Divide work 
     dim3 blockSize(THREADS_PER_BLOCK);
     // CSR
@@ -139,29 +140,31 @@ int main(int argc, char *argv[]) {
 	// CSR write, execute, read
     double dtimeCSR_gpu = omp_get_wtime();
     for (repeat = 0; repeat < REPEAT; repeat++) {
-        cudaMemcpy(d_vecIn, h_vecIn, h_mCSR.numCols*sizeof(float), cudaMemcpyHostToDevice);
+        checkCudaErrors(cudaMemcpy(d_vecIn, h_vecIn, h_mCSR.numCols*sizeof(float), cudaMemcpyHostToDevice));
         mCSRxVec<<<gridSizeCSR, blockSize>>>(d_mCSRrowPtr, d_mCSRcol, d_mCSRdata, d_vecIn, d_vecOut, h_mCSR.numRows);
-        cudaMemcpy(h_vecOutCSR_gpu, d_vecOut, h_mCSR.numRows*sizeof(float), cudaMemcpyDeviceToHost);
+        checkCudaErrors(cudaGetLastError());
+        checkCudaErrors(cudaMemcpy(h_vecOutCSR_gpu, d_vecOut, h_mCSR.numRows*sizeof(float), cudaMemcpyDeviceToHost));
     }
     dtimeCSR_gpu = omp_get_wtime()-dtimeCSR_gpu;
 																						
 	// ELL write, execute, read
     double dtimeELL_gpu = omp_get_wtime();
     for (repeat = 0; repeat < REPEAT; repeat++) {
-        cudaMemcpy(d_vecIn, h_vecIn, h_mCSR.numCols*sizeof(float), cudaMemcpyHostToDevice);
+        checkCudaErrors(cudaMemcpy(d_vecIn, h_vecIn, h_mCSR.numCols*sizeof(float), cudaMemcpyHostToDevice));
         mELLxVec<<<gridSizeELL, blockSize>>>(d_mELLcol, d_mELLdata, d_vecIn, d_vecOut, h_mELL.numRows, h_mELL.numElementsInRow);
-        cudaMemcpy(h_vecOutELL_gpu, d_vecOut, h_mELL.numRows*sizeof(float), cudaMemcpyDeviceToHost);
+        checkCudaErrors(cudaGetLastError());
+        checkCudaErrors(cudaMemcpy(h_vecOutELL_gpu, d_vecOut, h_mELL.numRows*sizeof(float), cudaMemcpyDeviceToHost));
     }
     dtimeELL_gpu = omp_get_wtime()-dtimeELL_gpu;
 
     // release device memory
-    cudaFree(d_mCSRrowPtr);
-    cudaFree(d_mCSRcol);
-    cudaFree(d_mCSRdata);
-    cudaFree(d_mELLcol);
-    cudaFree(d_mELLdata);
-    cudaFree(d_vecIn);
-    cudaFree(d_vecOut);
+    checkCudaErrors(cudaFree(d_mCSRrowPtr));
+    checkCudaErrors(cudaFree(d_mCSRcol));
+    checkCudaErrors(cudaFree(d_mCSRdata));
+    checkCudaErrors(cudaFree(d_mELLcol));
+    checkCudaErrors(cudaFree(d_mELLdata));
+    checkCudaErrors(cudaFree(d_vecIn));
+    checkCudaErrors(cudaFree(d_vecOut));
 
     // output
     printf("size: %ld x %ld, nonzero: %ld, max elems in row: %d\n", h_mCOO.numRows, h_mCOO.numCols, h_mCOO.numNonzero, h_mELL.numElementsInRow);
@@ -188,13 +191,6 @@ int main(int argc, char *argv[]) {
     mtx_COO_free(&h_mCOO);
     mtx_CSR_free(&h_mCSR);
     mtx_ELL_free(&h_mELL);
-
-    free(h_vecIn);
-    free(h_vecOutCOO_cpu);
-    free(h_vecOutCSR_cpu);
-    free(h_vecOutELL_cpu);
-    free(h_vecOutCSR_gpu);
-    free(h_vecOutELL_gpu);
 
 	return 0;
 }

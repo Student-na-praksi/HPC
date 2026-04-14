@@ -145,7 +145,7 @@
 
     ```C
     data[12] = (1, 5, 0, 6, 2, 4, 0, 7, 0, 3, 0, 0)
-    col[7]   = (0, 1, *, 1, 2, 2, *, 2, *, 3, *, *)
+    col[12]  = (0, 1, *, 1, 2, 2, *, 2, *, 3, *, *)
     numRows          = 4
     numElementsInRow = 3
     ```
@@ -179,7 +179,6 @@
     - runs on host
 
 <img src="figures/HYB.png" alt="Sparse matrix representation: HYB" width="75%" />
-
 
 ### Jagged diagonal storage (JDS)
 

@@ -9,6 +9,7 @@
 #include <math.h>
 #include "omp.h"
 #include <cuda.h>
+#include "helper_cuda.h"
 #include "mtxsparse.h"
 
 #define THREADS_PER_BLOCK 256
@@ -59,7 +60,7 @@ int main(int argc, char *argv[]) {
     // create full matrix from COO
     printf("%d %d %d\n", mCOO.numCols, mCOO.numRows, mCOO.numNonzero);
 
-	float* h_data = (float *)calloc(mCOO.numRows * mCOO.numCols, sizeof(float));
+	float* h_mData = (float *)calloc(mCOO.numRows * mCOO.numCols, sizeof(float));
     float** h_m;
 
     if (rowMajor) {
@@ -67,7 +68,7 @@ int main(int argc, char *argv[]) {
         h_m = (float **)malloc(sizeof(float *) * mCOO.numRows);
 
         for (int i = 0; i < mCOO.numRows; i++)
-            h_m[i] = &h_data[i * mCOO.numCols];
+            h_m[i] = &h_mData[i * mCOO.numCols];
 
         for (int k = 0; k < mCOO.numNonzero; k++)
             h_m[mCOO.row[k]][mCOO.col[k]] = mCOO.data[k];
@@ -76,7 +77,7 @@ int main(int argc, char *argv[]) {
         // col-major
         h_m = (float **)malloc(sizeof(float *) * mCOO.numCols);
         for (int i = 0; i < mCOO.numCols; i++)
-            h_m[i] = &h_data[i * mCOO.numRows];
+            h_m[i] = &h_mData[i * mCOO.numRows];
         for (int k = 0; k < mCOO.numNonzero; k++)
             h_m[mCOO.col[k]][mCOO.row[k]] = mCOO.data[k];
     }
@@ -108,22 +109,23 @@ int main(int argc, char *argv[]) {
         }
     h_dt = omp_get_wtime() - h_dt;
 
-    float *d_mdata, *d_vecIn, *d_vecOut;
-    cudaMalloc((void **)&d_mdata, mCOO.numRows * mCOO.numCols * sizeof(float));
-    cudaMalloc((void **)&d_vecIn, mCOO.numCols * sizeof(float));
-    cudaMalloc((void **)&d_vecOut, mCOO.numRows * sizeof(float));
+    float *d_mData, *d_vecIn, *d_vecOut;
+    checkCudaErrors(cudaMalloc((void **)&d_mData, mCOO.numRows * mCOO.numCols * sizeof(float)));
+    checkCudaErrors(cudaMalloc((void **)&d_vecIn, mCOO.numCols * sizeof(float)));
+    checkCudaErrors(cudaMalloc((void **)&d_vecOut, mCOO.numRows * sizeof(float)));
 
-    cudaMemcpy(d_mdata, h_data, mCOO.numRows * mCOO.numCols * sizeof(float), cudaMemcpyHostToDevice);
+    checkCudaErrors(cudaMemcpy(d_mData, h_mData, mCOO.numRows * mCOO.numCols * sizeof(float), cudaMemcpyHostToDevice));
 
 	// Divide work (square matrix)
-    dim3 gridsize((mCOO.numRows - 1) / THREADS_PER_BLOCK + 1);
-	dim3 blocksize(THREADS_PER_BLOCK);
+    dim3 gridSize((mCOO.numRows - 1) / THREADS_PER_BLOCK + 1);
+	dim3 blockSize(THREADS_PER_BLOCK);
     // COO write, execute, read
     double d_dt = omp_get_wtime();
     for(int repeat = 0; repeat < REPEAT; repeat++) {
-        cudaMemcpy(d_vecIn, h_vecIn, mCOO.numCols * sizeof(float), cudaMemcpyHostToDevice);
-        matxvec<<<gridsize, blocksize>>>(d_mdata, d_vecIn, d_vecOut, mCOO.numRows, mCOO.numCols, rowMajor);
-        cudaMemcpy(h_vecOut_gpu, d_vecOut, mCOO.numRows * sizeof(float), cudaMemcpyDeviceToHost);
+        checkCudaErrors(cudaMemcpy(d_vecIn, h_vecIn, mCOO.numCols * sizeof(float), cudaMemcpyHostToDevice));
+        matxvec<<<gridSize, blockSize>>>(d_mData, d_vecIn, d_vecOut, mCOO.numRows, mCOO.numCols, rowMajor);
+        checkCudaErrors(cudaGetLastError());
+        checkCudaErrors(cudaMemcpy(h_vecOut_gpu, d_vecOut, mCOO.numRows * sizeof(float), cudaMemcpyDeviceToHost));
     }
     d_dt = omp_get_wtime()-d_dt;
 
@@ -139,13 +141,17 @@ int main(int argc, char *argv[]) {
     printf("Errors: %d(gpu)\n", d_errors);
     printf("Times: %lf(cpu), %lf(gpu)\n", h_dt, d_dt);
 
-    // deallocate
+    // release device memory
+    checkCudaErrors(cudaFree(d_mData));
+    checkCudaErrors(cudaFree(d_vecIn));
+    checkCudaErrors(cudaFree(d_vecOut));
+
+    // release host memory
     free(h_vecIn);
     free(h_vecOut_cpu);
     free(h_vecOut_gpu);
-
     free(h_m);
-    free(h_data);
+    free(h_mData);
     mtx_COO_free(&mCOO);
 
 	return 0;
