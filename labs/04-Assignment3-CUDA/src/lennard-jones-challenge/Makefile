@@ -1,5 +1,5 @@
 # Compiler
-CC = gcc
+CC = nvcc
 
 # Compiler flags
 LDLIBS = -lm
