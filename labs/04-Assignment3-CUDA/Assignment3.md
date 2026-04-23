@@ -81,7 +81,7 @@ $$
 The simulation domain is a square box with periodic boundaries -- particles that leave the box re-enter from the opposite side. Since the simulation domain is finite but the system mimics its infinity, each particle has infinitely many periodic images. Thus, when computing the displacement vector $\mathbf{r}_{ij}$, we always select the image of particle $j$ that is closest to particle $i$. In practice, this is achieved by wrapping each component of the displacement vector into the interval $(-L/2, L/2]$,
 
 $$
-\mathbf{r}_{ij} = (\mathbf{r}_i - \mathbf{r}_j) - L \cdot \text{round}\!\left(\frac{\mathbf{r}_i - \mathbf{r}_j}{L}\right) \quad .
+\mathbf{r}_{ij} = (\mathbf{r}_i - \mathbf{r}_j) - L \cdot \text{round}\left(\frac{\mathbf{r}_i - \mathbf{r}_j}{L}\right) \quad .
 $$
 
 ### Time integration
