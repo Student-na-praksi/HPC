@@ -1,7 +1,9 @@
 #ifndef LJ_H
 #define LJ_H
 
-#include <stdint.h>
+#ifdef __cplusplus
+}
+#endif
 
 #define DT 0.002
 #define SIGMA 1.0
@@ -61,5 +63,9 @@ double leapfrog_step(
     double box_size
 );
 SimulationResult run_simulation(Particle *particles, unsigned int n, unsigned int nsteps, double box_size, int log_steps);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
