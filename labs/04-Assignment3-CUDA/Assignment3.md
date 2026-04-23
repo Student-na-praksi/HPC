@@ -84,7 +84,7 @@ $$
 \mathbf{r}_{ij} = (\mathbf{r}_i - \mathbf{r}_j) - L \cdot \text{round}\left(\frac{\mathbf{r}_i - \mathbf{r}_j}{L}\right) \quad .
 $$
 
-### Time integration
+**Time integration**
 
 The simulation advances using the Leapfrog scheme, which is time-reversible and conserves energy well over long runs. One simulation step of length $\Delta t$ consists of the following equations:
 
@@ -107,7 +107,7 @@ $$
 Besides, the kinetic energy and potential energy of the system,
 
 $$
-E_k=\sum_i \frac{1}{2}m|\mathbf{v}_i|^2 \quad \mathrm{and} \quad E_p = \sum_i\sum_{j\neq i} V_\mathrm{shifted}(r_{ij}) \quad,
+E_k=\sum_i \frac{1}{2}m|\mathbf{v}_i|^2 \quad \mathrm{and} \quad E_p = \sum_i\sum_{j\neq i} \frac{1}{2}V_\mathrm{shifted}(r_{ij}) \quad,
 $$
 
 are computed at each simulation step to verify the conservation of the total energy
@@ -137,7 +137,7 @@ Implement a parallel Lennard-Jones simulation in C/C++ using CUDA based on the [
 
 - Parallelise the algorithm using CUDA as efficiently as possible. Avoid unnecessary memory transfers between the host and the device. When dividing the workload, find the optimal number of threads and thread block size. Allow the option to track the system's energy at each step.
 - Measure the execution time of the algorithm on the Arnes cluster for different numbers of particles. Use the particle numbers: 1000, 2000, 4000, and 8000. Benchmark the algorithm on 5000 simulation steps. When measuring time, the data transfers to and from the GPU must also be included.
-- Compute the speed-up $S=t_s/t_p$ of your algorithm for each image size; $t_s$ is the execution time of the sequential algorithm on the CPU, and $t_p$ is the execution time of the parallel algorithm on the GPU. Run the algorithm multiple times (at least 5) and average the measurements. Note that the base code for high particle counts takes a long time to run. You can do only one run in such a case.
+- Compute the speed-up $S=t_s/t_p$ of your algorithm for each particle number; $t_s$ is the execution time of the sequential algorithm on the CPU, and $t_p$ is the execution time of the parallel algorithm on the GPU. Run the algorithm multiple times (at least 5) and average the measurements. Note that the base code for high particle counts takes a long time to run. You can do only one run in such a case.
 - Visualise the resulting final state (don't put it in the report, but store it separately). You can even create an animation that shows how the system behaves over time. Do not include the time required to produce the animation in the time measurements or speed-ups.
 - Write a short report (1-2 pages) summarising your solution and presenting the measurements performed on the cluster. The main focus should be on presenting and explaining the time measurements and speed-ups.
 - Hand in your code and the report (one submission per pair) to ucilnica through the appropriate form by the specified deadline (**5. 5. 2026**) and defend your code and report during labs.
@@ -155,14 +155,14 @@ Implement a parallel Lennard-Jones simulation in C/C++ using CUDA based on the [
 
 Produce a highly optimised implementation of the Lennard-Jones simulation code for the 3D case, which generates results aligned with the reference code.
 Prepare a C/C++ solution that supports graphics accelerators using CUDA. You are encouraged to combine CUDA with shared-memory systems using the OpenMP library to optimise execution times.
-Template code and run scripts are provided on the [repository](src/lennard-jones-challange). Your task is to implement the `run_simulation` function in the file `lennard-jones.cu`. The organisers will only consider the solutions built and executed using the script `run-lj.sh`. Each solution will be tested in an isolated environment consisting of one 12-core node, with two Nvidia V100 GPUS. Submit the solutions through the [course web page](https://ucilnica.fri.uni-lj.si/mod/assign/view.php?id=55667).
+Template code and run scripts are provided on the [repository](src/lennard-jones-challenge). Your task is to implement the `run_simulation` function in the file `lennard-jones.cu`. The organisers will only consider the solutions built and executed using the script `run-lj.sh`. Each solution will be tested in an isolated environment consisting of one 12-core node, with two Nvidia V100 GPUS. Submit the solutions through the [course web page](https://ucilnica.fri.uni-lj.si/mod/assign/view.php?id=55667).
 
-When submitting your solution, **DO NOT SUBMIT** the file `src/main.c`, as it will be ignored. During benchmarking, we will provide `main.c`, which will call the function `run_simulation` as defined in the header file `lennard-jones.h`. Use the provided `main.c` as a reference on how the benchmarks will be performed.
+When submitting your solution, **DO NOT SUBMIT** the file `src/main.c`, as it will be ignored. During benchmarking, we will provide `main.c`, which will call the `run_simulation` function defined in `lennard-jones.h`. Use the provided `main.c` as a reference on how the benchmarks will be performed.
 - We will benchmark on multiple particle system configurations (1000+ particles, 1000+ simulation steps). Energy logging will be disabled.
 - You can modify the `Makefile` and add additional files as you see fit, as long as the project compiles.
 - The sbatch script `run-lj.sh` includes the full allocations of resources, as it will be used during benchmarking your solution.
 - You can modify the `run-lj.sh` to change the allocation parameters if needed and submit it as part of your solution. You are limited to one V100 node.
-- The function `run_simulation` should return the starting and the final state of the system as defined in the struct `SimulationResult`. We will use it to verify your solution's correctness. We will treat the solution as correct if the returned values (start energies and final energies) are close enough to the reference solution for a given set of parameters. 
+- The function `run_simulation` should return the starting and the final state of the system as defined in the struct `SimulationResult`. We will use it to verify the correctness of your solution. We will treat the solution as correct if the returned values (start energies and final energies) are close enough to the reference solution for a given set of parameters. 
 
 
 ### Rules of the game
