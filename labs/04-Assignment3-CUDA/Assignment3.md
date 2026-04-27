@@ -177,5 +177,5 @@ When submitting your solution, **DO NOT SUBMIT** the file `src/main.c`, as it wi
   - Third place gets a bonus of 5/10 perfectly answered questions on the written exam.
   - The organisers reserve the right to reward other solutions with perfectly answered questions on the written exam at their discretion.
 - Notes:
-  - The candidate can use the rewards only on the first written exam they take.
+  - The candidate can use the rewards only on the first written exam he takes.
   - The final grade averages the written exam and assignment grades; the written exam grade determines rounding to a whole number.
