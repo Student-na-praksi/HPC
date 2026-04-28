@@ -81,17 +81,17 @@
     - bit-wise operations: ```MPI_BAND```, ```MPI_BOR```, ```MPI_BXOR```
     - extreme with location: ```MPI_MAXLOC```, ```MPI_MINLOC```
 
-    <img src="figures/reduce.png" alt="MPI collectives: reduce" width="50%">
-
+    <img src="figures/reduce.png" alt="MPI collectives: reduce" width="45%">
 
 - ```MPI_Scan``` and ```MPI_Exscan```
+  - inclusive and exclusive scan
 
-    <img src="figures/scan.png" alt="MPI collectives: scans" width="50%">
+    <img src="figures/scan.png" alt="MPI collectives: scans" width="45%">
 
 - ```MPI_Allreduce```
   - combination of reduce and broadcast
 
-    <img src="figures/allreduce.png" alt="MPI collectives: all reduce" width="50%">
+    <img src="figures/allreduce.png" alt="MPI collectives: all reduce" width="45%">
 
   - can be implemented with one pass of a tree
 
