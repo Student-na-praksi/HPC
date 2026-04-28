@@ -1,10 +1,10 @@
 //
-// send - receive - v2
+// send - receive - v5
 //
 // module load OpenMPI
-// mpicc -o p2p-2 p2p-2.c
+// mpicc -o p2p5 p2p5.c
 // salloc --reservation=fri --nodes=1 --ntasks-per-node=2 --cpus-per-task=1
-// mpirun --display-allocation --n 2 p2p-2 
+// mpirun --display-allocation --n 2 p2p5 
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -40,20 +40,9 @@ int main(int argc, char* argv[])
 	MPI_Barrier(MPI_COMM_WORLD);
 	inittime = MPI_Wtime();
 
-	if(taskid == 0)
-	{
-		MPI_Send(sendbuff, buffsize, MPI_INT, (taskid+1)%2, 
-				 0, MPI_COMM_WORLD);
-		MPI_Recv(recvbuff, buffsize, MPI_INT, (taskid+1)%2, 
-				 MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-	}
-	else
-	{
-		MPI_Recv(recvbuff, buffsize, MPI_INT, (taskid+1)%2, 
-				 MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-		MPI_Send(sendbuff, buffsize, MPI_INT, (taskid+1)%2, 
-				 0, MPI_COMM_WORLD);
-	}
+	MPI_Sendrecv(sendbuff, buffsize, MPI_INT, (taskid+1)%2, 0, 
+				 recvbuff, buffsize, MPI_INT, (taskid+1)%2, MPI_ANY_TAG,
+				 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
 	MPI_Barrier(MPI_COMM_WORLD);
 	totaltime = MPI_Wtime() - inittime;

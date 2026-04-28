@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=p2p-5
+#SBATCH --job-name=p2p1
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=2
 #SBATCH --cpus-per-task=1

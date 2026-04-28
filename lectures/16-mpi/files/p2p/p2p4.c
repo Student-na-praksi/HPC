@@ -1,10 +1,10 @@
 //
-// send - receive - v3
+// send - receive - v4
 //
 // module load OpenMPI
-// mpicc -o p2p-3 p2p-3.c
+// mpicc -o p2p4 p2p4.c
 // salloc --reservation=fri --nodes=1 --ntasks-per-node=2 --cpus-per-task=1
-// mpirun --display-allocation --n 2 p2p-3 
+// mpirun --display-allocation --n 2 p2p4 
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -19,6 +19,7 @@ int main(int argc, char* argv[])
 	int				*sendbuff, *recvbuff;
 	double			inittime, totaltime;
 	MPI_Request		sendrequest, recvrequest;
+	int				doneSend, doneRecv;
 
 	MPI_Init(&argc, &argv);
 
@@ -46,8 +47,15 @@ int main(int argc, char* argv[])
 	MPI_Irecv(recvbuff, buffsize, MPI_INT, (taskid+1)%2, 
 			  MPI_ANY_TAG, MPI_COMM_WORLD, &recvrequest);
 
-	MPI_Wait(&sendrequest, MPI_STATUS_IGNORE);
-	MPI_Wait(&recvrequest, MPI_STATUS_IGNORE);
+	doneSend = 0;
+	doneRecv = 0;
+	while(!doneSend && !doneRecv)
+	{
+		printf("%d", taskid);
+		MPI_Test(&sendrequest, &doneSend, MPI_STATUS_IGNORE);
+		MPI_Test(&recvrequest, &doneRecv, MPI_STATUS_IGNORE);
+	}
+	printf("\n");
 
 	MPI_Barrier(MPI_COMM_WORLD);
 	totaltime = MPI_Wtime() - inittime;
