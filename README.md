@@ -71,5 +71,5 @@
   - lectures:
     [Distributed-memory systems](lectures/15-distributed-memory-systems/distributed-memory.systems.md),
     [MPI](lectures/16-mpi/mpi.md)
-  - labs:
+  - labs: Consultations (Zoom)
   
