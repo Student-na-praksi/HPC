@@ -14,7 +14,7 @@
   - the same number of elements as the number of indices in input collections
   - the same dimensionality as location index collection
 
-  <img src="figures/gather-general.png" alt="Gather" width="40%">
+  <img src="figures/gather-general.png" alt="Gather" width="35%">
 
 - ```MPI_Gather```
   - less general
@@ -25,7 +25,7 @@
 - special gathers
 - have regular data access patterns
 
-  <img src="figures/shift-rotate.png" alt="Shift and rotate" width="40%">
+  <img src="figures/shift-rotate.png" alt="Shift and rotate" width="75%">
 
 - can be efficiently implemented using vector instructions
 - in multi-dimensions shift/rotate offsets may differ
@@ -47,7 +47,7 @@
 - a collection of input data is written to specified write locations
 - multiple writes to the same location are possible
 
-  <img src="figures/scatter-general.png" alt="Scatter" width="40%">
+  <img src="figures/scatter-general.png" alt="Scatter" width="35%">
 
 - resolutions
   - permutation scatter
@@ -88,7 +88,7 @@
 - pack can be fused with map
 - useful when small number of elements is discarded
 
-  <img src="figures/pack-unpack.png" alt="Pack and unpack" width="40%">
+  <img src="figures/pack-unpack.png" alt="Pack and unpack" width="75%">
 
 ### Split
 
@@ -102,7 +102,7 @@
 - in combination with map
 - when map can produce arbitrary number of elements
 
-  <img src="figures/expand.png" alt="Expand" width="40%">
+  <img src="figures/expand.png" alt="Expand" width="30%">
 
 ### ```MPI_Pack``` and ```MPI_Unpack```
 
@@ -111,7 +111,7 @@
 - ```MPI_Pack_size``` gives size of data in bytes; used to dynamically allocate size of pack structure
 - copies data to new location (better to use data types)
 
-  <img src="figures/pack-unpack.png" alt="Expand" width="60%">
+  <img src="figures/pack-unpack.png" alt="Expand" width="45%">
 
 
 ## Geometric Decomposition
@@ -129,6 +129,9 @@
 
 - non-overlapping sections to avoid write conflicts and race conditions
 - partitions are of equal size
+
+  <img src="figures/partition.png" alt="Partitions" width="40%">
+
 - 1D or multi dimensions
 - combined with map – no problems as it has exclusive access to partition
 - can be further split to allow for nested (hierarchical) parallelism
@@ -137,13 +140,11 @@
 - cache line size, vector-unit size
   - related to stencil strip-based operations
 
-<img src="figures/partition.png" alt="Partitions" width="50%">
-
 ### Segment
 
 - like partition, but sections vary in size
 
-  <img src="figures/segment.png" alt="Segments" width="50%">
+  <img src="figures/segment.png" alt="Segments" width="40%">
 
 
 - more complex functions for data manipulation must be used
@@ -158,7 +159,7 @@
     - complex function to determine to which segment belongs element $i$:
     $s = \min⁡(\lfloor i / (\lfloor N/S \rfloor + 1) \rfloor, \lfloor (i-r) / \lfloor N/S \rfloor\rfloor)$
 
-    <img src="figures/partition-larger-first.png" alt="Segments - larger first approach" width="60%">
+    <img src="figures/partition-larger-first.png" alt="Segments - larger first approach" width="75%">
 
   - mixed approach
     - larger and smaller segments are mixed
@@ -166,7 +167,7 @@
     - index of last element in segment $s$: $i_H = \lfloor (s+1) N / S \rfloor - 1$
     - element $i$ belongs to segment $s = \left\lfloor (S(i+1)-1)/N \right\rfloor$
 
-    <img src="figures/partition-mixed.png" alt="Segments - mixed approach" width="60%">
+    <img src="figures/partition-mixed.png" alt="Segments - mixed approach" width="75%">
 
 - segments in two dimensions
   - row-wise stripped
@@ -178,7 +179,7 @@
     - row stripped and column stripped: $2\times N$
     - checkerboard: $4\times \lceil N/\sqrt{S}\rceil$
 
-    <img src="figures/segments-2D.png" alt="Segments in 2D" width="75%">
+    <img src="figures/segments-2D.png" alt="Segments in 2D" width="85%">
 
 - exchange of bordering elements
   - new cell value depends on the values of its neighbours
@@ -189,7 +190,7 @@
   - latency hiding
     - initialization of communication cost more than some additional data transfer and computation
 
-    <img src="figures/stencil-comm.png" alt="Exchange of bordering elements" width="75%">
+    <img src="figures/stencil-comm.png" alt="Exchange of bordering elements" width="85%">
 
 ## Array of Structures (AoS) vs Structures of Arrays (SoA)
 
@@ -208,7 +209,7 @@
   - data is now contiguous, better aligned
   - better way of representing data when majority of data is used
 
-<img src="figures/aos-soa.png" alt="AoS and SoA" width="75%">
+<img src="figures/aos-soa.png" alt="AoS and SoA" width="65%">
 
 - conversion between AoS and SoA is not an easy task
   - significant changes in data structures
@@ -218,4 +219,4 @@
   - important for AoS
   - for SoA can be added, but is usually not really needed
 
-<img src="figures/aos-soa-padding.png" alt="Padding when using AoS and SoA" width="75%">
+<img src="figures/aos-soa-padding.png" alt="Padding when using AoS and SoA" width="80%">
