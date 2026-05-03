@@ -178,126 +178,95 @@
   - important for AoS
   - for SoA can be added, but is usually not really needed
 
-## xxx
+## MPI: Derived Data Types
 
-- processes in communicator
-  - ```MPI_COMM_WORLD``` is default
-  - can create own subsets
-  - MPI-2+ can create even bigger sets if dynamic process allocation is supported
-- programs using only collective communication are easy to understand
-  - every process does roughly the same thing
-  - no inventive communication patterns
-- functions for collective communication are optimized
-  - devised by experts
-  - detailed implementation depends on infrastructure
-    - existing protocols in network infrastructure (broadcast)
-- all collective functions must be called by all processes in the communicator
-- functions work with any number of processes from 1 onwards
-- all collective functions are blocking (MPI-1, MPI-2)
-- there are no tags
-- basic data types (MPI-1, MPI-2)
-- types of collectives
-  - synchronization
-  - data transfer
-  - collective computation
+- any data layout can be described with them
+- derived from basic MPI data types
+  - for passing data organized as AoS
+- allow for efficient transfer of non-contiguous and heterogeneous data
+  - example: halo exchange
+  - during communication MPI data type tells MPI system where to get the data and where to put it
+- both solutions help user to avoid hand-coding
+- libraries should have efficient implementations
+  - more general data types are slower
+  - no need for ```MPI_Pack``` and ```MPI_Unpack```
+  - overhead is reduced as only one long message is sent
+
+### Derived Data type
+
+- an object used to describe a data layout in memory by
+  - a sequence of basic data types
+  - a sequence of displacements
+- constructed and destroyed during runtime
+- structure
+  - ```Typemap```: pairs of basic MPI data types and displacements
+    - ```{(type 0, displacement 0), ..., (type N-1, displacement N-1)}```
+    - example: ```{(int, 0}, (double, 8), (char, 16)}```
+- data type routines
+  - construction
+    - ```MPI_Type_contiguous```: contiguous data type
+    - ```MPI_Type_vector```: regularly spaced data type
+    - ```MPI_Type_indexed```: variably spaced data type
+    - ```MPI_Type_create_subarray```: describes subarray of an array
+    - ```MPI_Type_create_struct```: general data type
+  - commit
+    - ```MPI_Type_commit```: must be called before new data type can be used
+  - free
+    - ```MPI_Type_free```: marks a data type for deallocation
+
+- ```MPI_Type_contiguous```
+
+  - output data type is obtained by concatenating defined number of copies of input data type
+  - constructs a ```typemap``` for output data type consisting of replications of input data type
+
+- ```MPI_Type_contiguous```
+
+  - example: matrix row as a data type
+
+- ```MPI_Type_vector```
+
+  - similar to ```MPI_Type_continuous``` but with self-defined stride
+  - input
+    - number of blocks
+    - number of elements of input data type in each block
+    - stride - number of elements between beginnings of neighbouring blocks
+    - example: matrix column as a data type
+
+- ```MPI_Type_indexed```
   
-## Synchronization
+  - generalization of MPI_Type_vector
+    - number of blocks
+    - for each block we specify number of elements and stride
 
-- ```MPI_Barrier```
-  - rarely used
-  - for performance measurements
+- ```MPI_Type_create_subarray```
 
-## Data Transfer
+  - creates a data type which is a subarray of an array
+  - useful for column-wise distribution of data
 
-- ```MPI_Bcast```
-  - one to all (broadcast)
+- ```MPI_Type_create_struct```
 
+  - ```Typemap```
+    - pairs of basic data types and displacements
+  - extent
+    - span from the lower to the upper bound
+    - inner holes are counted, holes at the end are not!
+    - important for alignment of data types to data, not for construction and memory allocation
+    - query: ```MPI_Type_get_extent```
+  - size
+  - number of bytes that has to be transferred
+  - holes are not counted
+  - query: ```MPI_Type_size```
+  - Example
+    - to get displacements
+    - ```MPI_Type_get_extent```
+    - ```MPI_Get_address```
+  
+- ```MPI_Type_create_resized```
+
+  - output data type is identical to the input data type but lower bound and extent are changed
+  - useful to correct stride for communication
+    - example: zip
+  - when size of MPI data type and system data type are not equal, the MPI data type can be corrected for portability
+  
     <img src="figures/bcast.png" alt="MPI collectives: broadcast" width="50%">
-
-- ```MPI_Scatter```and ```MPI_Gather```
-  - scatters or gathers data across processes in the same communicator
-
-    <img src="figures/scatter-gather.png" alt="MPI collectives: scatter and gather" width="50%">
-
-  - expect all data chunks to be of the same size
-  - root process takes care of one data chunk
-  - some parameters are valid on side of sender, some on side of receiver
-  - tree-like implementation of gather
-
-    <img src="figures/gather-by-tree.png" alt="MPI collectives: scatter and gather" width="70%">
-
-- ```MPI_Scatterv``` and ```MPI_Scatterv```
-  - more general but slower functions
-  - size of data chunk can vary
-
-- ```MPI_Allgather```
-  - combines gather and broadcast
-  - can be efficiently implemented by only one pass of the tree
-
-    <img src="figures/allgather.png" alt="MPI collectives: gather on all" width="50%">
-
-- ```MPI_Alltoall```
-  - transpose of data
-  - tricky to implement efficiently
-  
-    <img src="figures/alltoall.png" alt="MPI collectives: all to all" width="50%">
-
-- example: The Conway's Game of Life
-  - the board is split to horizontal stripes
-  - cells on borders are exchanged via ```MPI_Sendrecv```
-  - code:
     - [conway.c](files/conway/conway.c)
-    - [board.h](files/conway/board.h)
-    - [conway.sh](files/conway/conway.sh)
-
-## Collective computation
-
-- ```MPI_Reduce```
-  - reduces data from several processes
-  - reduce operations
-    - extreme: ```MPI_MIN```, ```MPI_MAX```
-    - sum and product: ```MPI_SUM```, ```MPI_PROD```
-    - logical operations: ```MPI_LAND```, ```MPI_LOR```, ```MPI_LXOR```
-    - bit-wise operations: ```MPI_BAND```, ```MPI_BOR```, ```MPI_BXOR```
-    - extreme with location: ```MPI_MAXLOC```, ```MPI_MINLOC```
-
-    <img src="figures/reduce.png" alt="MPI collectives: reduce" width="45%">
-
-- ```MPI_Scan``` and ```MPI_Exscan```
-  - inclusive and exclusive scan
-
-    <img src="figures/scan.png" alt="MPI collectives: scans" width="45%">
-
-- ```MPI_Allreduce```
-  - combination of reduce and broadcast
-
-    <img src="figures/allreduce.png" alt="MPI collectives: all reduce" width="45%">
-
-  - can be implemented with one pass of a tree
-
-    <img src="figures/allreduce-by-tree.png" alt="MPI collectives: all reduce in one pass" width="85%">
-
-- determinism
-  - rounding error, truncation, depends on order of computation
-  - MPI does not guarantee the same result on the same input
-    - encouraged but not required
-    - not all applications need it
-    - more efficient implementations of collectives are possible without it
-
-- example: reduce with location information
-  - combined data type
-  - code:
-    - [maxloc.c](files/maxloc/maxloc.c)
-    - [maxloc.sh](files/maxloc/maxloc.sh)
-
-## Advanced MPI Features
-
-- data types
-- communicators
-- virtual topology
-  - reflects actual system configuration
-  - Cartesian, graph
-- MPI-IO
-- collective functions
-  - neighborhood
-  - immediate
