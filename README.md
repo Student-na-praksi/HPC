@@ -65,11 +65,19 @@
   - lectures:
     Invited lecture from Prof. Amr El Abbadi, University of California, Santa Barbara. Distributed Systems and Databases of the Globe Unite!
   - labs:
-    [Assignment 3 - Molecular dynamics](labs/04-Assignment3-CUDA/Assignment3.md)
+    [Assignment 3 - Molecular Dynamics](labs/04-Assignment3-CUDA/Assignment3.md)
 
 - Week 10:
   - lectures:
-    [Distributed-memory systems](lectures/15-distributed-memory-systems/distributed-memory.systems.md),
+    [Distributed-memory Systems](lectures/15-distributed-memory-systems/distributed-memory.systems.md),
     [MPI](lectures/16-mpi/mpi.md)
-  - labs: Consultations (Zoom)
+  - labs:
+    Consultations (Zoom)
+
+- Week 11:
+  - lectures:
+    [MPI Collectives](lectures/17-mpi-collectives/mpi-collectives.md),
+    [Data Reorganization Patterns](lectures/18-data-reorg-patterns/data-reorg-patterns.md)
+  - labs:
+    
   
