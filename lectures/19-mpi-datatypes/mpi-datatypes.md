@@ -22,6 +22,9 @@
   - ```Typemap```: pairs of basic MPI data types and displacements
     - ```{(type 0, displacement 0), ..., (type N-1, displacement N-1)}```
     - example: ```{(int, 0}, (double, 8), (char, 16)}```
+
+      <img src="figures/typemap.png" alt="Typemap" width="70%">
+
 - data type routines
   - construction
     - ```MPI_Type_contiguous```: contiguous data type
@@ -34,11 +37,18 @@
   - free
     - ```MPI_Type_free```: marks a data type for deallocation
 
+- example code: [aos.c](files/aos/aos.c)
+
 ### ```MPI_Type_contiguous```
 
 - output data type is obtained by concatenating defined number of copies of input data type
+
+  <img src="figures/contigous.png" alt="MPI_Type_contigous" width="35%">
+
 - constructs a ```typemap``` for output data type consisting of replications of input data type
 - example: matrix row as a data type
+
+  <img src="figures/contigous-example.png" alt="MPI_Type_contigous example" width="60%">
 
 ### ```MPI_Type_vector```
 
@@ -47,7 +57,15 @@
   - number of blocks
   - number of elements of input data type in each block
   - stride - number of elements between beginnings of neighbouring blocks
-  - example: matrix column as a data type
+
+    <img src="figures/vector.png" alt="MPI_Type_vector" width="50%">
+
+- example: matrix column as a data type
+
+    <img src="figures/vector-example.png" alt="MPI_Type_vector example" width="50%">
+
+- example: halo exchange with MPI data types
+  - code: [halo.c](files/halo/halo.c)
 
 ### ```MPI_Type_indexed```
   
@@ -55,10 +73,15 @@
   - number of blocks
   - for each block we specify number of elements and stride
 
+    <img src="figures/indexed.png" alt="MPI_Type_indexed" width="50%">
+
+
 ### ```MPI_Type_create_subarray```
 
 - creates a data type which is a sub-array of an array
 - useful for column-wise distribution of data
+
+    <img src="figures/subarray.png" alt="MPI_Type_create_subarray" width="30%">
 
 ### ```MPI_Type_create_struct```
 
@@ -78,12 +101,12 @@
   - ```MPI_Type_get_extent```
   - ```MPI_Get_address```
 
+  <img src="figures/extent.png" alt="Extent" width="45%">
+
 ### ```MPI_Type_create_resized```
 
 - output data type is identical to the input data type but lower bound and extent are changed
 - useful to correct stride for communication
   - example: zip
 - when size of MPI data type and system data type are not equal, the MPI data type can be corrected for portability
-
-    <img src="figures/bcast.png" alt="MPI collectives: broadcast" width="50%">
-    - [conway.c](files/conway/conway.c)
+- example: [zip-unzip.c](files/zip-unzip/zip-unzip.c)
