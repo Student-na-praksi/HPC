@@ -80,3 +80,8 @@
     [Data Reorganization Patterns](lectures/18-data-reorg-patterns/data-reorg-patterns.md),
     [MPI Data Types](lectures/19-mpi-datatypes/mpi-datatypes.md)
   - labs:
+
+- Week 12:
+  - lectures:
+    [NCCL](lectures/20-nccl/nccl.md),
+  - labs:
