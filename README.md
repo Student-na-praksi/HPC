@@ -84,4 +84,10 @@
 - Week 12:
   - lectures:
     [NCCL](lectures/20-nccl/nccl.md),
+    [Patterns: Fork-join](lectures/21-patterns-fork-join/patterns-fork-join.md)
   - labs: [Assignment 4 - Lenia with MPI](labs/05-Assignment4-MPI/Assignment4.md)
+
+- Week 13:
+  - lectures:
+    [Performance Measures]
+  - labs:
