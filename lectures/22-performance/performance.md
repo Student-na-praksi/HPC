@@ -124,14 +124,14 @@
     - span is computation time on ideal parallel machine, $t_{\infty} = t_p(n, \infty)$
       - also named critical path, step complexity, depth
   - work-span model assumes that units of work are of the same time complexity
-- upper execution time limit
+- lower execution time limit
   - work law: $t_p(n,p) \geq \frac{t_1(n)}{p}$
   - span law: $t_p(n,p) \geq t_{\infty}(n)$
   - combined:
 
     $t_p(n,p) \geq \max(\frac{t_1(n)}{p}, t_{\infty}(n))$
 
-- lower execution time limit follows Bren's theorem
+- upper execution time limit follows Brent's theorem
   - problem can be ideally distributed to $q$ processors, but we have $p \leq q$
   - some processors do additional work: $t_p(n,p) \leq t_p(n,q) + \frac{t_1(n)-t_p(n,q)}{p}$
   - simplifications
@@ -245,4 +245,4 @@
       - suppose that the number of workers and number of operands are doubled
         - quantity of work per processors remains equal, $\chi\left(\left\lceil\frac{2n}{2p}\right\rceil - 1\right) = \chi\left(\left\lceil\frac{n}{p}\right\rceil - 1\right)$
         - one additional reduction step is required, $(\chi + \lambda)\lceil\log_2 2p\rceil = (\chi + \lambda)(\lceil\log_2 p\rceil + 1)$
-      - when doubling number of workers ($p_2=2p_1$), doubling number of operands ($n_2 = 2 n_1$) is not enough - to satisfy relations $n_1=C''p_1\log_2 p_1$ and $n_2=C''p_2\log_2 p_2$, we should more than double operands, $n_2 = 2n_1 + 2C''p$
+      - when doubling number of workers ($p_2=2p_1$), doubling number of operands ($n_2 = 2 n_1$) is not enough - to satisfy relations $n_1=C''p_1\log_2 p_1$ and $n_2=C''p_2\log_2 p_2$, we should more than double operands, $n_2 = 2n_1 + 2C''p_1$
