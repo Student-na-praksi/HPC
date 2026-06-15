@@ -93,7 +93,10 @@
   - lectures:
     [Performance Measures](lectures/22-performance/performance.md)
   - labs: Consultations regarding Assignment 4
- 
+
 - Week 14:
   - lectures:
   - labs: Assignment 4 report defense  
+
+- Exams:
+  - [12. 6. 2026](/exams/Exam-20260612-solution.pdf)
