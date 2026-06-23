@@ -100,3 +100,4 @@
 
 - Exams:
   - [12. 6. 2026](/exams/Exam-20260612-solution.pdf)
+  - [22. 6. 2026](/exams/Exam-20260622-solution.pdf)
